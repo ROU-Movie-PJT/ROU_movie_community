@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'ACCOUNTS',
     'COMMUNITY',
     'MOVIES',
+    'QUIZZES',
     'rest_framework',
     'corsheaders',
     'django.contrib.admin',
@@ -134,4 +135,4 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'ACCOUNTS.User'
+# AUTH_USER_MODEL = 'ACCOUNTS.User'

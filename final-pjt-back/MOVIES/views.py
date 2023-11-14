@@ -1,12 +1,38 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework import status
 from .serializers import MovieTitleSerializer, MovieListSerializer
 from .models import Movie
+import requests
 
+BASE_URL = 'https://api.themoviedb.org/3/movie/popular'
+API_KEY = '49d792ca8a7053508d689eedb328f369'
 
 # Create your views here.
+
+
+@api_view(['GET'])
+def api_test(request):
+    for page in range(1, 11):
+        params = {
+            'language': 'ko-KR',
+            'api_key': API_KEY,
+            'page': page
+        }
+        response = requests.get(BASE_URL, params=params).json()
+        movie_list = response['results']
+
+        for movie in movie_list:
+            # genres = movie['genre_ids']
+            # movie['genre'] = genres
+            movieserializer = MovieListSerializer(data=movie)
+            if movieserializer.is_valid(raise_exception=True):
+                movieserializer.save()
+    return JsonResponse({'message': 'Success'})
+
+
 @api_view(['GET'])
 def index(request):
     movies = Movie.objects.all()
@@ -23,4 +49,3 @@ def detail(request, movie_pk):
 
 def recommended(request):
     pass
-
