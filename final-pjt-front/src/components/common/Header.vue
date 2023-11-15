@@ -1,6 +1,6 @@
 <script setup>
   import { ref } from 'vue'
-  const isSearching = ref(true)
+  const isSearching = ref(false)
 </script>
 
 <template>
@@ -8,7 +8,7 @@
     <nav class="header-nav">
       <button class="login-btn">로그인</button>
       <form class="search-bar">
-        <input class="input-text" type="text">
+        <input class="input-text" type="text" placeholder="영화 제목, 감독 이름으로 검색 가능">
         <button v-if="!isSearching" class="search-btn" type="submit">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#clip0_10_294)">
@@ -39,6 +39,7 @@
     left: 0;
     width: 100%;
     padding-left: 200px;
+    z-index: 500;
   }
 
   .header-nav {
@@ -60,12 +61,18 @@
     background-color: white;
     overflow: hidden;
     font-size: 1rem;
+    width: 20%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 5px;
   }
 
   .input-text {
     border: none;
     background-color: rgba(0, 0, 0, 0);
     color: black;
+    font-size: small;
+    width: 80%;
   }
 
   .input-text:focus {
@@ -92,11 +99,5 @@
     .header {
       padding-left: 0;
     }
-  }
-</style>
-
-<style>
-  .header {
-    z-index: 500;
   }
 </style>

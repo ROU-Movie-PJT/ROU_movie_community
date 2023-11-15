@@ -8,14 +8,17 @@
       <img class="logo" src="../../assets/logo.png" alt="logo">
     </a>
     <ul class="menu">
-      <li class="link">
+      <li>
         <RouterLink class="link" :to="{name: 'home'}">Home</RouterLink>
       </li>
-      <li class="link">
+      <li>
         <RouterLink class="link" to="/">Profile</RouterLink>
       </li>
-      <li class="link">
+      <li>
         <RouterLink class="link" to="/">Quiz</RouterLink>
+      </li>
+      <li>
+        <RouterLink class="link" to="/">Review</RouterLink>
       </li>
     </ul>
   </div>
@@ -33,6 +36,7 @@
     flex-direction: column;
     justify-content: flex-start;
     padding: 0;
+    z-index: 501;
   }
 
   .home {
@@ -49,7 +53,9 @@
   .menu {
     list-style: none;
     padding: 0;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
   }
 
   .link {
@@ -57,7 +63,6 @@
     font-size: 26px;
     text-decoration: none;
     font-weight: bold;
-    margin-bottom: 1.5rem;
     text-align: center;
   }
 
@@ -65,11 +70,5 @@
     .navbar {
       display: none;
     }
-  }
-</style>
-
-<style>
-  .navbar {
-    z-index: 501;
   }
 </style>
