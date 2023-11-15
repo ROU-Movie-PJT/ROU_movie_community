@@ -9,7 +9,7 @@ class Genre(models.Model):
 class Movie(models.Model):
     title = models.CharField(max_length=100)
     overview = models.TextField(null=True, blank=True)
-    release_date = models.DateTimeField()  # DateField
+    release_date = models.DateField()
     poster_path = models.TextField()
     popularity = models.FloatField()
     vote_count = models.IntegerField()
