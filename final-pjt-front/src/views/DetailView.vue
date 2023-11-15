@@ -94,6 +94,7 @@
   .text {
     margin: 0;
     font-size: small;
+    font-family: 'Pretendard-ExtraLight';
   }
 
   .md-text {

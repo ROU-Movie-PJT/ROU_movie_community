@@ -14,5 +14,6 @@
   .badge {
     height: 20px;
     cursor: pointer;
+    font-family: 'Pretendard-ExtraLight';
   }
 </style>
