@@ -4,9 +4,34 @@
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      @font-face {
+        font-family: 'Pretendard-Regular';
+        src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+        font-weight: 300;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: 'Pretendard-ExtraLight';
+        src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-ExtraLight.woff') format('woff');
+        font-weight: 300;
+        font-style: normal;
+      }
+
+      /* 웹 폰트 깨짐 방지 */
+      p, a, h1, h2, h3, h4, h5, h6 {
+        transform: rotate(0.03deg);
+      }
+
+      html, body, #app {
+        height: 100%;
+        font-family: 'Pretendard-Regular';
+      }
+    </style>
     <title>Vite App</title>
   </head>
-  <body>
+  <body class="bg-black">
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
