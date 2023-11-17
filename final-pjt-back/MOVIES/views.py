@@ -26,7 +26,7 @@ TMDB_DETAIL_INFO_BASE_URL = 'https://api.themoviedb.org/3/movie/'
 
 
 # TMDB API 현재 상영중인 영화
-KOBIS_BASE_URL = 'http://kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json'
+TMDB_TRENDING_BASE_URL = 'https://api.themoviedb.org/3/trending/movie/day'
 
 
 # Create your views here.
@@ -110,25 +110,5 @@ def api_test_TP(request):
 
 # TMDB 영화 detail info
 @api_view(['GET'])
-def api_test_TD(request):
-    pass
-    # for movie_id in Movie['movie_id']:
-    #     params = {
-    #         'language': 'ko-KR',
-    #         'api_key': TMDB_API_KEY,
-    #         'append_to_response': credits,
-    #     }
-
-    # response = requests.get(TMDB_DETAIL_BASE_URL, params=params).json()
-    # movie_infos = response
-
-    # for info in movie_infos:
-    #         movieserializer = MovieListSerializer(data=movie)
-    #         if movieserializer.is_valid(raise_exception=True):
-    #             movieserializer.save()
-    # return JsonResponse({'message': 'Success'})
-
-
-@api_view(['GET'])
-def api_test_K(request):
+def api_test_TT(request):
     pass
