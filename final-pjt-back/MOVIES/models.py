@@ -1,4 +1,5 @@
 from django.db import models
+# from django.conf import settings
 
 
 # Create your models here.
@@ -13,6 +14,12 @@ class Actor(models.Model):
 class Genre(models.Model):
     genre_id = models.IntegerField()
     name = models.CharField(max_length=10)
+
+
+# TMDB Trend 목록
+class Trend(models.Model):
+    title = models.CharField(max_length=100)
+    poster_path = models.CharField(max_length=60, blank=True, null=True)
 
 
 # TMDB popular 영화 목록
@@ -32,10 +39,9 @@ class Movie(models.Model):
     runtime = models.IntegerField()
     actors = models.ManyToManyField(Actor)
     director = models.CharField(max_length=50, null=True, blank=True)
-
-
-    
-
-    
-    
+     
+    # like_movie_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='like_movies', blank=True) # 영화를 좋아요한 사용자
+    # dislike_movie_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='dislike_movies', blank=True) # 영화를 싫어요한 사용자
+    # watching_movie_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='watching_movies', blank=True) # 영화를 시청한 사용자
+    # favorite_movie_users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='favorite_movies', blank=True) # 영화를 찜한 사용자
 
