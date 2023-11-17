@@ -14,7 +14,7 @@
   <div class="info">
     <div class="left-box">
       <div class="title-box">
-        <h3 class="title">{{ info.title }}</h3>
+        <h2 class="title">{{ info.title }}</h2>
         <span class="text">⭐{{ info.vote_average }}</span>
       </div>
       <hr>
@@ -22,6 +22,7 @@
       <p class="text"><b class="md-text">장르</b> - 액션, 코미디</p>
       <p class="text"><b class="md-text">감독</b> - 미야자키 하야오</p>
       <p class="text">{{ info.overview }}</p>
+      <hr>
       <div class="buttons">
         <button class="button">
           <img src="../../assets/watch.svg" alt="">
@@ -66,18 +67,15 @@
   }
 
   .poster {
-    width: 185px;
-    height: 260px;
+    width: 20%;
   }
 
   .text {
     margin: 0;
-    font-size: small;
-    font-family: 'Pretendard-ExtraLight';
   }
 
   .md-text {
-    font-size: medium;
+    font-size: large;
   }
 
   .title {
