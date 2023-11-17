@@ -36,4 +36,4 @@ class CustomRegisterSerializer(RegisterSerializer):
 
 #   class Meta:
 #     model = User
-#     fields = ('id', 'followers', 'username', 'profile_image', 'region', 'followings', 'hate_genres', 'like_genres')
+#     fields = ('id', 'followers', 'username', 'profile_image', 'region', 'followings', 'hate_genres', 'like_genres', 'birth')
