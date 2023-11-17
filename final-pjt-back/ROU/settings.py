@@ -65,7 +65,7 @@ REST_FRAMEWORK = {
     ],
     # Permission
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
@@ -165,7 +165,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'ACCOUNTS.User'
 
 REST_AUTH = {
-  'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer'
+  'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer',
+  'USER_DETAILS_SERIALIZER' : 'ACCOUNTS.serializers.ProfileSerializer'    
 }
 
 ACCOUNT_ADAPTER = 'ACCOUNTS.adapters.CustomAccountsAdapter'

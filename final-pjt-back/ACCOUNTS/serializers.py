@@ -19,21 +19,21 @@ class CustomRegisterSerializer(RegisterSerializer):
     data['birth'] = self.validated_data.get('birth', '')
     return data
   
-# class ProfileSerializer(UserDetailsSerializer):
-#   class GenreSerializer(serializers.ModelSerializer):
-#     class Meta:
-#       model = Genre
-#       fields = '__all__'
+class ProfileSerializer(UserDetailsSerializer):
+  class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+      model = Genre
+      fields = '__all__'
 
-#   class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#       model = User
-#       fields = ('id',)
+  class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+      model = User
+      fields = ('id',)
 
-#   hate_genres = GenreSerializer(many=True, read_only=True)
-#   like_genres = GenreSerializer(many=True, read_only=True)
-#   followers = UserSerializer(many=True)
+  hate_genres = GenreSerializer(many=True, read_only=True)
+  like_genres = GenreSerializer(many=True, read_only=True)
+  followers = UserSerializer(many=True)
 
-#   class Meta:
-#     model = User
-#     fields = ('id', 'followers', 'username', 'profile_image', 'region', 'followings', 'hate_genres', 'like_genres', 'birth')
+  class Meta:
+    model = User
+    fields = ('id', 'followers', 'username', 'profile_image', 'region', 'followings', 'hate_genres', 'like_genres', 'birth', 'rate_image')
