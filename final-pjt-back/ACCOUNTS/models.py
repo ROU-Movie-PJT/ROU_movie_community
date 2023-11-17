@@ -10,3 +10,4 @@ class User(AbstractUser):
   hate_genres = models.ManyToManyField(Genre, related_name='hate_users', blank=True)
   rate_image = models.CharField(max_length=200, null=True, blank=True)
   region = models.CharField(max_length=100)
+  birth = models.DateField()
