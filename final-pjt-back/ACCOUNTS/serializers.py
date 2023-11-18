@@ -2,7 +2,7 @@ from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth import get_user_model
-from MOVIES.models import Genre
+from MOVIES.serializers import GenreSerializer
 
 User = get_user_model()
 
@@ -18,13 +18,9 @@ class CustomRegisterSerializer(RegisterSerializer):
     data['region'] = self.validated_data.get('region', '')
     data['birth'] = self.validated_data.get('birth', '')
     return data
-  
-class ProfileSerializer(UserDetailsSerializer):
-  class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-      model = Genre
-      fields = '__all__'
 
+# 프로필 조회 / 프로필 이미지, 지역, 생년월일 수정
+class ProfileSerializer(UserDetailsSerializer):
   class UserSerializer(serializers.ModelSerializer):
     class Meta:
       model = User
@@ -37,3 +33,19 @@ class ProfileSerializer(UserDetailsSerializer):
   class Meta:
     model = User
     fields = ('id', 'followers', 'username', 'profile_image', 'region', 'followings', 'hate_genres', 'like_genres', 'birth', 'rate_image')
+
+# 사용자 불호 장르 조회/수정
+class HateGenreSerializer(serializers.ModelSerializer):
+  hate_genres = GenreSerializer(many=True, read_only=True)
+
+  class Meta:
+    model = User
+    fields = ('id', 'username', 'hate_genres', )
+
+# 사용자 선호 장르 조회/수정
+class LikeGenreSerializer(serializers.ModelSerializer):
+  like_genres = GenreSerializer(many=True, read_only=True)
+
+  class Meta:
+    model = User
+    fields = ('id', 'username', 'like_genres', )
