@@ -190,12 +190,18 @@ def movie_detail(request, movie_pk):
 
 
 # # 영화별 게시글 조회
-# def movie_review(request):
-#     pass
-
+@api_view(['GET'])
+# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
+@permission_classes([IsAuthenticatedOrReadOnly])
+def movie_review(request, movie_pk):
+    movie = Movie.objects.get(pk=movie_pk)
+    serializer = MovieReviewSerializer(movie)
+    return Response(serializer.data)
 
 # 영화 좋아요 등록 및 해제(좋아요 수까지 출력)
 # 인증된 사용자만 권한 허용
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def movie_like(request, movie_pk):

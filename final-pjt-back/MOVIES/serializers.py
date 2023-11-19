@@ -64,21 +64,20 @@ class MovieSerializer(serializers.ModelSerializer):
                             'dislike_movie_users_count', 'watching_movie_users_count', 'favorite_movie_users_count', 'review_movie_count')
 
 
-# # 영화별 게시글 조회
-# class MovieReviewSerializer(serializers.ModelSerializer):
+# 영화별 게시글 조회
+class MovieReviewSerializer(serializers.ModelSerializer):
 
-#     class ReviewSerializer(serializers.ModelSerializer):
-#         class Meta:
-#             model = Review
-#             fields = '__all__'
+    class ReviewSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Review
+            fields = '__all__'
 
-#     write_movie_review = ReviewSerializer(many=True) # 영화에 작성된 게시글
+    write_movie_review = ReviewSerializer(many=True)  # 영화에 작성된 게시글
 
-
-#     class Meta:
-#         model = Movie
-#         # 영화 id, 영화에 작성된 게시글
-#         fields = ('id', 'write_movie_review')
+    class Meta:
+        model = Movie
+        # 영화 id, 영화에 작성된 게시글
+        fields = ('id', 'write_movie_review')
 
 
 # 영화 좋아요 등록 및 해제
