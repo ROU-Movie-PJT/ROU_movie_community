@@ -3,6 +3,9 @@ from dj_rest_auth.registration.serializers import RegisterSerializer
 from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth import get_user_model
 from MOVIES.serializers import GenreSerializer
+from MOVIES.models import Movie
+
+User = get_user_model()
 
 # 사용자가 좋아요/위시리스트/평점을 준 영화 목록 조회
 class UserMovieListSerializer(serializers.ModelSerializer):
