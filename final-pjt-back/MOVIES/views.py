@@ -6,38 +6,43 @@ from rest_framework import status
 from django.http import JsonResponse
 from django.conf import settings
 from django.db.models import Count
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.contrib.auth import get_user_model
 from .serializers import *
-from .models import Movie, Actor
-# from datetime import datetime
+from .models import *
+from datetime import datetime
 import requests
+import json
+from asgiref.sync import sync_to_async
+import aiohttp
+import asyncio
 
 
-# movies = Movie.objects.annotate(
-#         like_movie_users_count=Count('like_movie_users', distinct=True), # 좋아요한 사용자 수
-#         dislike_movie_users_count=Count('dislike_movie_users', distinct=True), # 싫어요한 사용자 수
-#         watching_movie_users_count=Count('watching_movie_users', distinct=True), # 시청중인 사용자 수
-#         favorite_movie_users_count=Count('favorite_movie_users', distinct=True), # 찜한 사용자 수
-#         review_movie_count=Count('write_movie_review', distinct=True)) # 리뷰글의 수)
+User = get_user_model()
 
-# User = get_user_model()
+
+movies = Movie.objects.annotate(
+    like_movie_users_count=Count(
+        'like_movie_users', distinct=True),  # 좋아요한 사용자 수
+    dislike_movie_users_count=Count(
+        'dislike_movie_users', distinct=True),  # 싫어요한 사용자 수
+    watching_movie_users_count=Count(
+        'watching_movie_users', distinct=True),  # 시청중인 사용자 수
+    favorite_movie_users_count=Count(
+        'favorite_movie_users', distinct=True),  # 찜한 사용자 수
+)
+# review_movie_count=Count('write_movie_review', distinct=True))  # 리뷰글의 수)
+
 
 # TMDB API 인기있는 영화
 TMDB_POPULAR_BASE_URL = 'https://api.themoviedb.org/3/movie/popular'
-TMDB_API_KEY = '7598462be8b94fc1e04d0e6dd30a782e'
-
-
 # TMDB API Genre 정보
 TMDB_GENRE_BASE_URL = 'https://api.themoviedb.org/3/genre/movie/list'
-
-
 # TMDB API 상세 정보
 TMDB_DETAIL_INFO_BASE_URL = 'https://api.themoviedb.org/3/movie/'
-
-
 # TMDB API 현재 상영중인 영화
 TMDB_TRENDING_BASE_URL = 'https://api.themoviedb.org/3/trending/movie/day'
+TMDB_API_KEY = '7598462be8b94fc1e04d0e6dd30a782e'
 
 
 # Create your views here.
@@ -45,9 +50,9 @@ TMDB_TRENDING_BASE_URL = 'https://api.themoviedb.org/3/trending/movie/day'
 @api_view(['GET'])
 def api_test_TG(request):
     params = {
-            'language': 'ko',
-            'api_key': TMDB_API_KEY,
-        }
+        'language': 'ko',
+        'api_key': TMDB_API_KEY,
+    }
     response = requests.get(TMDB_GENRE_BASE_URL, params=params).json()
     movie_genres = response['genres']
 
@@ -56,7 +61,7 @@ def api_test_TG(request):
         if genre_serializer.is_valid(raise_exception=True):
             genre_id = genre['id']
             genre_serializer.save(genre_id=genre_id)
-    return JsonResponse({'message': 'Success'})   
+    return JsonResponse({'message': 'Success'})
 
 
 # TMDB 영화 트렌드
@@ -73,84 +78,109 @@ def api_test_TT(request):
         trend_serializer = TrendSerializer(data=movie)
         if trend_serializer.is_valid(raise_exception=True):
             trend_serializer.save()
-    return JsonResponse({'message': 'Success'})           
+    return JsonResponse({'message': 'Success'})
 
-import json
 
 # TMDB popular 영화 목록
 @api_view(['GET'])
 def api_test_TP(request):
-    for page in range(1, 501):
-        params = {
-            'language': 'ko-KR',
-            'api_key': TMDB_API_KEY,
-            'page': page
-        }
-        try:
-            response = requests.get(TMDB_POPULAR_BASE_URL, params=params).json()
-            movie_list = response['results']
-            
-            for movie in movie_list:
-                movie_id = movie['id']
-                params = {
-                    'language': 'ko-KR',
-                    'api_key': TMDB_API_KEY,
-                    'append_to_response': 'credits',
-                }
-                try:
-                    response = requests.get(f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=params).json()
-                    runtime = response['runtime']
-                    cast_list = response['credits']['cast']
-                    for actor in cast_list:
-                        if actor['id'] not in Actor.objects.values_list('person_id', flat=True):
-                            actor_serializer = ActorSerializer(data=actor)
-                            if actor_serializer.is_valid(raise_exception=True):
-                                person_id = actor['id']
-                                actor_serializer.save(person_id=person_id)
-                    crew_list = response['credits']['crew']
-                    if crew_list == []:
-                        movie['director'] = None
-                    else:
-                        for crew in crew_list:
-                            if crew['job'] == 'Director':
-                                movie['director'] = crew['name']
-                                break
-                        else:
-                            movie['director'] = None
-
-                    movie['runtime'] = runtime                  
-                    movie_serializer = MovieSerializer(data=movie)
-                
-                    if movie_serializer.is_valid(raise_exception=True):
-                        movie_id = movie['id']
-                        if movie['release_date'] == '':
-                            movie['release_date'] = None
-                        movie_serializer.save(movie_id = movie_id, release_date=movie['release_date'], director=movie['director'])
-                except json.JSONDecodeError as e:
-                    pass        
-        except json.JSONDecodeError as e:
-            pass
-               
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    result = loop.run_until_complete(fetch_all_movies())
     return JsonResponse({'message': 'Success'})
 
 
+async def fetch_all_movies():
+    async with aiohttp.ClientSession() as session:
+        for page in range(1, 501):
+            await fetch_movie_page(session, page)
+
+
+async def fetch_movie_page(session, page):
+    params = {
+        'language': 'ko-KR',
+        'api_key': TMDB_API_KEY,
+        'page': page
+    }
+    response = await session.get(TMDB_POPULAR_BASE_URL, params=params)
+    data = await response.json()
+    movie_list = data['results']
+    await fetch_movie_details(session, movie_list)
+
+
+async def fetch_movie_details(session, movie_list):
+    for movie in movie_list:
+        await process_movie(session, movie)
+
+
+async def check_and_save_actor(actor):
+    if actor['id'] not in await sync_to_async(Actor.objects.values_list)('person_id', flat=True):
+        actor_serializer = ActorSerializer(data=actor)
+        if actor_serializer.is_valid(raise_exception=True):
+            await sync_to_async(actor_serializer.save)(person_id=actor['id'])
+
+
+async def process_movie(session, movie):
+    movie_id = movie['id']
+    params = {
+        'language': 'ko-KR',
+        'api_key': TMDB_API_KEY,
+        'append_to_response': 'credits',
+    }
+    response = await session.get(f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=params)
+    movie_detail = await response.json()
+
+    # 동기 함수로 분리된 ORM 작업 호출
+    await sync_to_async(process_movie_orm, thread_sensitive=True)(movie, movie_detail)
+
+
+def process_movie_orm(movie, movie_detail):
+    # 영화 상세 정보 처리
+    runtime = movie_detail['runtime']
+    cast_list = movie_detail['credits']['cast']
+    for actor in cast_list:
+        if actor['id'] not in Actor.objects.values_list('person_id', flat=True):
+            actor_serializer = ActorSerializer(data=actor)
+            if actor_serializer.is_valid(raise_exception=True):
+                actor_serializer.save(person_id=actor['id'])
+
+    crew_list = movie_detail['credits']['crew']
+    if not crew_list:
+        movie['director'] = None
+    else:
+        movie['director'] = next(
+            (crew['name'] for crew in crew_list if crew['job'] == 'Director'), None)
+
+    movie['runtime'] = runtime
+    movie_serializer = MovieSerializer(data=movie)
+
+    if movie_serializer.is_valid(raise_exception=True):
+        movie_id = movie['id']
+        if movie['release_date'] == '':
+            movie['release_date'] = None
+        movie_serializer.save(
+            movie_id=movie_id, release_date=movie['release_date'], director=movie['director'])
+
+
 # 메인 영화 조회
-# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능 
+# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def movies_main(request):
-    main_movies = movies.filter(release_date__lte=date.today()).order_by('-release_date', '-vote_average')[:20]
-    serializer = MovieSerializer(main_movies, Many=True)
+    main_movies = movies.filter(release_date__lte=date.today()).order_by(
+        '-release_date', '-vote_average')[:20]
+    serializer = MovieSerializer(main_movies, many=True)
+    print(main_movies)
     return Response(serializer.data)
-  
 
-# 필터링된 영화 정보(장르 포함)
-def movie_sort(request):
-    pass
+
+# # 필터링된 영화 정보(장르 포함)
+# def movie_sort(request):
+#     pass
 
 
 # 단일 영화 조회
-# 모든 사용자 GET가능 
+# 모든 사용자 GET가능
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def movie_detail(request, movie_pk):
@@ -159,112 +189,120 @@ def movie_detail(request, movie_pk):
     return Response(serializer.data)
 
 
-# 영화별 게시글 조회
-def movie_review(request):
-    pass
+# # 영화별 게시글 조회
+@api_view(['GET'])
+# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
+@permission_classes([IsAuthenticatedOrReadOnly])
+def movie_review(request, movie_pk):
+    movie = Movie.objects.get(pk=movie_pk)
+    serializer = MovieReviewSerializer(movie)
+    return Response(serializer.data)
+
+# 영화 좋아요 등록 및 해제(좋아요 수까지 출력)
+# 인증된 사용자만 권한 허용
 
 
-# # 영화 좋아요 등록 및 해제(좋아요 수까지 출력)
-# # 인증된 사용자만 권한 허용
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def movie_like(request, movie_pk):
-#     movie = get_object_or_404(Movie, pk=movie_pk)
-#     user = request.user
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def movie_like(request, movie_pk):
+    movie = get_object_or_404(Movie, pk=movie_pk)
+    user = request.user
 
-#     # 해제
-#     if movie.like_movie_users.filter(pk=user.pk).exists():
-#         movie.like_movie_users.remove(user)
+    # 해제
+    if movie.like_movie_users.filter(pk=user.pk).exists():
+        movie.like_movie_users.remove(user)
 
-#     # 등록
-#     else:
-#         movie.like_movie_users.add(user)
+    # 등록
+    else:
+        movie.like_movie_users.add(user)
 
-#     serializer = MovieLikeSerializer(movie) 
+    serializer = MovieLikeSerializer(movie)
 
-#     like_movie_register = {
-#         'id' : serializer.data.get('id'),
-#         'like_movie_users_count' : movie.like_movie_users.count(),
-#         'like_movie_users' : serializer.data.get('like_movie_users'),
-#     }
-#     return JsonResponse(like_movie_register)   
+    like_movie_register = {
+        'id': serializer.data.get('id'),
+        'like_movie_users_count': movie.like_movie_users.count(),
+        'like_movie_users': serializer.data.get('like_movie_users'),
+    }
+    return JsonResponse(like_movie_register)
 
-# # 영화 싫어요 등록 및 해제(싫어요 수까지 출력)
-# # 인증된 사용자만 권한 허용
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def movie_dislike(request, movie_pk):
-#     movie = get_object_or_404(Movie, pk=movie_pk)
-#     user = request.user
-
-#     # 해제
-#     if movie.dislike_movie_users.filter(pk=user.pk).exists():
-#         movie.dislike_movie_users.remove(user)
-
-#     # 등록
-#     else:
-#         movie.dislike_movie_users.add(user)
-
-#     serializer = MovieDisLikeSerializer(movie) 
-
-#     dislike_movie_register = {
-#         'id' : serializer.data.get('id'),
-#         'like_movie_users_count' : movie.dislike_movie_users.count(),
-#         'like_movie_users' : serializer.data.get('dislike_movie_users'),
-#     }
-#     return JsonResponse(dislike_movie_register)     
+# 영화 싫어요 등록 및 해제(싫어요 수까지 출력)
+# 인증된 사용자만 권한 허용
 
 
-# # 시청 중인 영화 등록 및 해제(시청 수까지 출력)
-# # 인증된 사용자만 권한 허용
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def movie_watching(request, movie_pk):
-#     movie = get_object_or_404(Movie, pk=movie_pk)
-#     user = request.user
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def movie_dislike(request, movie_pk):
+    movie = get_object_or_404(Movie, pk=movie_pk)
+    user = request.user
 
-#     # 해제
-#     if movie.watching_movie_users.filter(pk=user.pk).exists():
-#         movie.watching_movie_users.remove(user)
+    # 해제
+    if movie.dislike_movie_users.filter(pk=user.pk).exists():
+        movie.dislike_movie_users.remove(user)
 
-#     # 등록
-#     else:
-#         movie.watching_movie_users.add(user)
+    # 등록
+    else:
+        movie.dislike_movie_users.add(user)
 
-#     serializer = MovieWatchingSerializer(movie) 
+    serializer = MovieDisLikeSerializer(movie)
 
-#     watching_movie_register = {
-#         'id' : serializer.data.get('id'),
-#         'watching_movie_users_count' : movie.watching_movie_users.count(),
-#         'watching_movie_users' : serializer.data.get('watching_movie_users'),
-#     }
-#     return JsonResponse(watching_movie_register)
+    dislike_movie_register = {
+        'id': serializer.data.get('id'),
+        'like_movie_users_count': movie.dislike_movie_users.count(),
+        'like_movie_users': serializer.data.get('dislike_movie_users'),
+    }
+    return JsonResponse(dislike_movie_register)
 
 
-# # 찜한 영화 등록 및 해제(시청 수까지 출력)
-# # 인증된 사용자만 권한 허용
-# @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-# def movie_favorite(request, movie_pk):
-#     movie = get_object_or_404(Movie, pk=movie_pk)
-#     user = request.user
+# 시청 중인 영화 등록 및 해제(시청 수까지 출력)
+# 인증된 사용자만 권한 허용
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def movie_watching(request, movie_pk):
+    movie = get_object_or_404(Movie, pk=movie_pk)
+    user = request.user
 
-#     # 해제
-#     if movie.favorite_movie_users.filter(pk=user.pk).exists():
-#         movie.favorite_movie_users.remove(user)
+    # 해제
+    if movie.watching_movie_users.filter(pk=user.pk).exists():
+        movie.watching_movie_users.remove(user)
 
-#     # 등록
-#     else:
-#         movie.favorite_movie_users.add(user)
+    # 등록
+    else:
+        movie.watching_movie_users.add(user)
 
-#     serializer = MovieFavoriteSerializer(movie) 
+    serializer = MovieWatchingSerializer(movie)
 
-#     favorite_movie_register = {
-#         'id' : serializer.data.get('id'),
-#         'favorite_movie_users_count' : movie.favorite_movie_users.count(),
-#         'favorite_movie_users' : serializer.data.get('favorite_movie_users'),
-#     }
-#     return JsonResponse(favorite_movie_register)
+    watching_movie_register = {
+        'id': serializer.data.get('id'),
+        'watching_movie_users_count': movie.watching_movie_users.count(),
+        'watching_movie_users': serializer.data.get('watching_movie_users'),
+    }
+    return JsonResponse(watching_movie_register)
+
+
+# 찜한 영화 등록 및 해제(시청 수까지 출력)
+# 인증된 사용자만 권한 허용
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def movie_favorite(request, movie_pk):
+    movie = get_object_or_404(Movie, pk=movie_pk)
+    user = request.user
+
+    # 해제
+    if movie.favorite_movie_users.filter(pk=user.pk).exists():
+        movie.favorite_movie_users.remove(user)
+
+    # 등록
+    else:
+        movie.favorite_movie_users.add(user)
+
+    serializer = MovieFavoriteSerializer(movie)
+
+    favorite_movie_register = {
+        'id': serializer.data.get('id'),
+        'favorite_movie_users_count': movie.favorite_movie_users.count(),
+        'favorite_movie_users': serializer.data.get('favorite_movie_users'),
+    }
+    return JsonResponse(favorite_movie_register)
 
 
 # 박스오피스 인기 영화 조회
@@ -272,22 +310,109 @@ def movie_review(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def movie_trend(request):
-    movie = get_object_or_404(Trend)
-    serializer = TrendSerializer(movie)
+    movies = get_list_or_404(Trend, pk__in=range(1, 21))
+    serializer = TrendSerializer(movies, many=True)
     return Response(serializer.data)
 
 
-# (추천)장르별 추천 영화 조회
-def movie_genre(request):
-    pass
+# # (추천)장르별 추천 영화 조회
+@api_view(['GET'])
+# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
+@permission_classes([IsAuthenticatedOrReadOnly])
+def movie_genre(request, genre_id):
+    genre_movie = movies.filter(
+        genres=genre_id,
+        release_date__lte=date.today()).order_by('?')[:10]
+    serializer = MovieSerializer(genre_movie, many=True)
+    return Response(serializer.data)
 
 
-# (추천)역대급 영화
-def best_movie(request):
-    pass
+# 필터링된 영화 정보
+@api_view(['GET'])
+# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
+@permission_classes([IsAuthenticatedOrReadOnly])
+def movie_sort(request, sort_num):
+    if sort_num == 1:  # 관객수(popularity)
+        sort_movies = movies.order_by('-popularity')[:30]
+    elif sort_num == 2:  # 최신순(개봉한 영화만)
+        sort_movies = movies.filter(
+            release_date__lte=date.today()).order_by('-release_date')[:30]
+    elif sort_num == 3:  # 개봉예정작 : 빠른 개봉 순으로
+        sort_movies = movies.filter(
+            release_date__gt=date.today()).order_by('release_date')[:30]
+    elif sort_num == 4:  # 리뷰 많은 순(개봉한 영화만), 최신순
+        sort_movies = movies.filter(release_date__lte=date.today()).order_by(
+            '-review_movie_count', '-release_date')[:30]
+    elif sort_num == 5:  # 평점순(vote_average/개봉한 영화)
+        sort_movies = movies.filter(
+            release_date__lte=date.today()).order_by('-vote_average')[:30]
+    # 장르 포함
+    elif sort_num == 12:  # 모험
+        sort_movies = movies.filter(
+            genres__id=12).order_by('-release_date')[:30]
+    elif sort_num == 14:  # 판타지
+        sort_movies = movies.filter(
+            genres__id=14).order_by('-release_date')[:30]
+    elif sort_num == 16:  # 애니메이션
+        sort_movies = movies.filter(
+            genres__id=16).order_by('-release_date')[:30]
+    elif sort_num == 18:  # 드라마
+        sort_movies = movies.filter(
+            genres__id=18).order_by('-release_date')[:30]
+    elif sort_num == 27:  # 공포
+        sort_movies = movies.filter(
+            genres__id=27).order_by('-release_date')[:30]
+    elif sort_num == 28:  # 액션
+        sort_movies = movies.filter(
+            genres__id=28).order_by('-release_date')[:30]
+    elif sort_num == 35:  # 코미디
+        sort_movies = movies.filter(
+            genres__id=35).order_by('-release_date')[:30]
+    elif sort_num == 36:  # 역사
+        sort_movies = movies.filter(
+            genres__id=36).order_by('-release_date')[:30]
+    elif sort_num == 37:  # 서부
+        sort_movies = movies.filter(
+            genres__id=37).order_by('-release_date')[:30]
+    elif sort_num == 53:  # 스릴러
+        sort_movies = movies.filter(
+            genres__id=53).order_by('-release_date')[:30]
+    elif sort_num == 80:  # 범죄
+        sort_movies = movies.filter(
+            genres__id=80).order_by('-release_date')[:30]
+    elif sort_num == 99:  # 다큐멘터리
+        sort_movies = movies.filter(
+            genres__id=99).order_by('-release_date')[:30]
+    elif sort_num == 878:  # SF
+        sort_movies = movies.filter(
+            genres__id=878).order_by('-release_date')[:30]
+    elif sort_num == 9648:  # 미스터리
+        sort_movies = movies.filter(
+            genres__id=9648).order_by('-release_date')[:30]
+    elif sort_num == 10402:  # 음악
+        sort_movies = movies.filter(
+            genres__id=10402).order_by('-release_date')[:30]
+    elif sort_num == 10749:  # 로맨스
+        sort_movies = movies.filter(
+            genres__id=10749).order_by('-release_date')[:30]
+    elif sort_num == 10751:  # 가족
+        sort_movies = movies.filter(
+            genres__id=10751).order_by('-release_date')[:30]
+    elif sort_num == 10752:  # 전쟁
+        sort_movies = movies.filter(
+            genres__id=10752).order_by('-release_date')[:30]
+    elif sort_num == 10770:  # TV 영화
+        sort_movies = movies.filter(
+            genres__id=10770).order_by('-release_date')[:30]
+    serializer = MovieSerializer(sort_movies, many=True)
+    return Response(serializer.data)
 
 
-# (추천)날씨별 추천 영화
-# (추천)날씨별 추천 영화
-def for_weather(request):
-    pass
+# # (추천)역대급 영화
+# def best_movie(request):
+#     pass
+
+
+# # (추천)날씨별 추천 영화
+# def for_weather(request):
+#     pass

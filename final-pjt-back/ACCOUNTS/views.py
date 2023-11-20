@@ -1,12 +1,14 @@
+import datetime
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from .serializers import ProfileSerializer, HateGenreSerializer, LikeGenreSerializer
+from rest_framework.permissions import *
+from .serializers import *
 from MOVIES.models import Genre
+from django.http import JsonResponse
 
 User = get_user_model()
 
@@ -74,3 +76,27 @@ def follow(request, user_pk):
     return Response(serializer.data)
   else:
     return Response({'detail': '본인은 팔로우 불가'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_friend(request, user_pk):
+    me = get_object_or_404(User, pk=user_pk)
+    # user = request.user # username이 출력
+    serializer = ProfileSerializer(me)  # 나의 정보를 추출
+    # 연도 추출 : 나의 나이 +-3
+    year = int(serializer.data.get('birth')[:4])
+    first_date = datetime.date(year - 3, 1, 1)
+    last_date = datetime.date(year + 3, 12, 31)
+    # 나를 제외하고 지역이 같은 사람을 추출
+    friends = User.objects.filter(
+        region=serializer.data.get('region'),
+        birth__range=(first_date, last_date)).exclude(username=me)
+    serializer = ProfileSerializer(friends, many=True)
+    if friends.exists():
+        return Response(serializer.data)
+    else:
+        data = {
+            'content': f'추천 친구가 없습니다.',
+        }
+        return Response(data, status=status.HTTP_204_NO_CONTENT)

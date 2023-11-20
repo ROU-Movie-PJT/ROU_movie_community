@@ -4,6 +4,30 @@ from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth import get_user_model
 from MOVIES.serializers import GenreSerializer
 
+# 사용자가 좋아요/위시리스트/평점을 준 영화 목록 조회
+class UserMovieListSerializer(serializers.ModelSerializer):
+
+    class MovieSerializer(serializers.ModelSerializer):
+
+        class Meta:
+            model = Movie
+            fields = ('movie_id', 'title', 'poster_path',)
+
+    # 좋아요한 영화 목록
+    like_movies = MovieSerializer(many=True)
+    # 싫어요한 영화 목록
+    dislike_movie = MovieSerializer(many=True)
+    # 찜한 영화 목록
+    watching_movie = MovieSerializer(many=True)
+    # 시청한 영화 목록
+    favorite_movie = MovieSerializer(many=True)
+
+    class Meta:
+        model = User
+        # 사용자 id, 평가한 영화 목록, 좋아요한 영화 목록, 위시리스트에 담은 영화 목록
+        fields = ('id', 'like_movies', 'dislike_movie',
+                  'watching_movie', 'favorite_movie',)
+
 User = get_user_model()
 
 class CustomRegisterSerializer(RegisterSerializer):
