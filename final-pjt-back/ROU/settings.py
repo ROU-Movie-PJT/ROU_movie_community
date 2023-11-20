@@ -60,11 +60,13 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 REST_FRAMEWORK = {
+    #Authentication
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication'
     ],
+    # Permission
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
@@ -80,8 +82,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:5173',
-    'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:5173',
 ]
 
 ROOT_URLCONF = 'ROU.urls'
@@ -164,8 +166,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'ACCOUNTS.User'
 
 REST_AUTH = {
-    'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer',
-    'USER_DETAILS_SERIALIZER': 'ACCOUNTS.serializers.ProfileSerializer'
+  'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer',
+  'USER_DETAILS_SERIALIZER' : 'ACCOUNTS.serializers.ProfileSerializer'    
 }
 
 ACCOUNT_ADAPTER = 'ACCOUNTS.adapters.CustomAccountsAdapter'
