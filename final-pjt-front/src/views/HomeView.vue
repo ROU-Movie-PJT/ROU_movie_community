@@ -1,16 +1,42 @@
 <script setup>
-  import { ref } from 'vue'
+  import { ref, watch } from 'vue'
   import { useRouter } from 'vue-router'
+  import { useMovieStore } from '../stores/movies'
   import Carousel from '../components/home/Carousel.vue'
   import Badge from '../components/common/Badge.vue'
   import MovieCard from '../components/home/MovieCard.vue'
 
+  const store = useMovieStore()
   const router = useRouter()
 
-  const genres = ref(['액션', '모험', '애니메이션', '코미디', '범죄', '다큐멘터리', '드라마', '가족', '판타지', '역사', '공포', '음악', '미스터리', '로맨스', 'SF', '스릴러', '전쟁', '서부'])
-  const favoriteGenres = ref(['액션', '모험', '애니메이션'])
+  const choice = {
+    12: '모험',
+    14: '판타지',
+    16: '애니메이션',
+    18: '드라마',
+    27: '공포',
+    28: '액션',
+    35: '코미디',
+    36: '역사',
+    37: '서부',
+    53: '스릴러',
+    80: '범죄',
+    99: '다큐멘터리',
+    878: 'SF',
+    9648: '미스터리',
+    10402: '음악',
+    10749: '로맨스',
+    10751: '가족',
+    10752: '전쟁',
+    10770: 'TV 영화'
+  }
+  const favoriteGenres = ref({
+    14: '판타지',
+    28: '액션',
+    35: '코미디',
+  })
   const viewMore = ref(false)
-  const activeBadge = ref('전체')
+  const activeBadge = ref(0)
 
   const moreGenres = function() {
     viewMore.value = !viewMore.value
@@ -23,6 +49,14 @@
   const goDetail = function(id) {
     router.push({name: 'movie_detail', params: {id: id}})
   }
+
+  watch(activeBadge, (newValue, oldValue) => {
+    if (activeBadge.value === 0) {
+      store.getRecommendMovies()
+    } else {
+      store.getMovieList(activeBadge.value)
+    }
+  })
 </script>
 
 <template>
@@ -30,14 +64,14 @@
     <Carousel />
     <div class="badges">
       <Badge 
-        :class="{'text-bg-primary': activeBadge === '전체', 'text-bg-secondary': activeBadge !== '전체'}" 
-        name="전체"
-        @click="selectBadge('전체')"
+        :class="{'text-bg-primary': activeBadge === 0, 'text-bg-secondary': activeBadge !== 0}" 
+        name="추천"
+        @click="selectBadge(0)"
       />
       <Badge 
-        v-for="genre in viewMore ? genres : favoriteGenres" 
+        v-for="genre in viewMore ? Object.keys(choice) : Object.keys(favoriteGenres)" 
         :class="{'text-bg-secondary': activeBadge !== genre, 'text-bg-primary': activeBadge === genre}" 
-        :name="genre"
+        :name="choice[genre]"
         @click="selectBadge(genre)"
       />
       <Badge class="text-bg-light" @click="moreGenres" :name="viewMore ? 'X' : '더보기'" />

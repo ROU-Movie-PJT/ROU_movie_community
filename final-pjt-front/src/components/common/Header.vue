@@ -1,12 +1,29 @@
 <script setup>
   import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useUserStore } from '../../stores/user'
+  
+  const store = useUserStore()
+  const router = useRouter()
   const isSearching = ref(false)
+
+  const goLogin = function () {
+    router.push({name: 'login'})
+  }
+
+  const goRegister = function () {
+    router.push({name: 'register'})
+  }
 </script>
 
 <template>
   <div class="header">
     <nav class="header-nav">
-      <button class="login-btn">로그인</button>
+      <button v-if="store.isLogin" class="login-btn" @click="store.logout">로그아웃</button>
+      <div class="btn-box" v-else>
+        <button class="login-btn" @click="goRegister">회원가입</button>
+        <button class="login-btn" @click="goLogin">로그인</button>
+      </div>
       <form class="search-bar">
         <input class="input-text" type="text" placeholder="영화 제목, 감독 이름으로 검색 가능">
         <button v-if="!isSearching" class="search-btn" type="submit">
@@ -93,6 +110,11 @@
     border: none;
     border-radius: 5px;
     font-size: 1rem;
+  }
+
+  .btn-box {
+    display: flex;
+    gap: .5rem; 
   }
 
   @media screen and (max-width: 47em) {

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.serializers import LoginSerializer
 from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth import get_user_model
 from MOVIES.serializers import GenreSerializer
@@ -30,8 +31,6 @@ class UserMovieListSerializer(serializers.ModelSerializer):
         # 사용자 id, 평가한 영화 목록, 좋아요한 영화 목록, 위시리스트에 담은 영화 목록
         fields = ('id', 'like_movies', 'dislike_movie',
                   'watching_movie', 'favorite_movie',)
-
-User = get_user_model()
 
 class CustomRegisterSerializer(RegisterSerializer):
   region = serializers.CharField(max_length=50)
