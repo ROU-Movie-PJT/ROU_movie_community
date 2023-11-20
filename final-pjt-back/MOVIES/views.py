@@ -30,8 +30,9 @@ movies = Movie.objects.annotate(
         'watching_movie_users', distinct=True),  # 시청중인 사용자 수
     favorite_movie_users_count=Count(
         'favorite_movie_users', distinct=True),  # 찜한 사용자 수
-)
-# review_movie_count=Count('write_movie_review', distinct=True))  # 리뷰글의 수)
+    review_movie_count=Count('write_movie_review', distinct=True), # 리뷰글의 수
+    )  
+
 
 
 # TMDB API 인기있는 영화
@@ -174,9 +175,6 @@ def movies_main(request):
     return Response(serializer.data)
 
 
-# # 필터링된 영화 정보(장르 포함)
-# def movie_sort(request):
-#     pass
 
 
 # 단일 영화 조회
@@ -247,8 +245,8 @@ def movie_dislike(request, movie_pk):
 
     dislike_movie_register = {
         'id': serializer.data.get('id'),
-        'like_movie_users_count': movie.dislike_movie_users.count(),
-        'like_movie_users': serializer.data.get('dislike_movie_users'),
+        'dislike_movie_users_count': movie.dislike_movie_users.count(),
+        'dislike_movie_users': serializer.data.get('dislike_movie_users'),
     }
     return JsonResponse(dislike_movie_register)
 
@@ -340,9 +338,6 @@ def movie_sort(request, sort_num):
     elif sort_num == 3:  # 개봉예정작 : 빠른 개봉 순으로
         sort_movies = movies.filter(
             release_date__gt=date.today()).order_by('release_date')[:30]
-    elif sort_num == 4:  # 리뷰 많은 순(개봉한 영화만), 최신순
-        sort_movies = movies.filter(release_date__lte=date.today()).order_by(
-            '-review_movie_count', '-release_date')[:30]
     elif sort_num == 5:  # 평점순(vote_average/개봉한 영화)
         sort_movies = movies.filter(
             release_date__lte=date.today()).order_by('-vote_average')[:30]

@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'MOVIES',
     'ACCOUNTS',
     'COMMUNITY',
+    'QUIZ',
+    'MESSENGER',
 
     # 3rd party apps
     'rest_framework',
@@ -171,3 +173,10 @@ REST_AUTH = {
 }
 
 ACCOUNT_ADAPTER = 'ACCOUNTS.adapters.CustomAccountsAdapter'
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+]

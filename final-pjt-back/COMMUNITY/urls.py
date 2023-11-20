@@ -11,6 +11,7 @@ urlpatterns = [
     # 단일 게시글 조회, 수정, 삭제
     path('<int:review_pk>/', views.review_detail_or_update_or_delete),
     path('<int:review_pk>/like/', views.review_like),  # 게시글 좋아요 등록 및 해제
+    path('<int:review_pk>/dislike/', views.review_dislike),  # 게시글 좋아요 등록 및 해제
 
     # comment
     # 게시글 별 댓글 조회 및 최상위 댓글 생성
