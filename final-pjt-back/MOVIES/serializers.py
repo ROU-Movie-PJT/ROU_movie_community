@@ -45,22 +45,29 @@ class MovieSerializer(serializers.ModelSerializer):
 
     genres = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=Genre.objects.all()
+        queryset=Genre.objects.all(),
+        required=False  # 변경: 필드를 선택적으로 만듭니다.
     )
+
     actors = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=Actor.objects.all()
+        queryset=Actor.objects.all(),
+        required=False  # 변경: 필드를 선택적으로 만듭니다.
     )
-    like_movie_users_count = serializers.IntegerField()  # 좋아요한 사용자 수
-    dislike_movie_users_count = serializers.IntegerField()  # 영화를 싫어요한 사용자
-    watching_movie_users_count = serializers.IntegerField()  # 영화를 시청한 사용자
-    favorite_movie_users_count = serializers.IntegerField()  # 영화를 찜한 사용자
+    like_movie_users_count = serializers.IntegerField(
+        read_only=True)  # 좋아요한 사용자 수
+    dislike_movie_users_count = serializers.IntegerField(
+        read_only=True)  # 영화를 싫어요한 사용자
+    watching_movie_users_count = serializers.IntegerField(
+        read_only=True)  # 영화를 시청한 사용자
+    favorite_movie_users_count = serializers.IntegerField(
+        read_only=True)  # 영화를 찜한 사용자
     # review_movie_count = serializers.IntegerField()  # 리뷰글의 수
 
     class Meta:
         model = Movie
         fields = '__all__'
-        read_only_fields = ('movie_id', 'release_date', 'genres', 'actors', 'like_movie_users_count',
+        read_only_fields = ('movie_id', 'release_date', 'like_movie_users_count',
                             'dislike_movie_users_count', 'watching_movie_users_count', 'favorite_movie_users_count', 'review_movie_count')
 
 

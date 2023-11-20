@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from .views import *
 
 app_name = 'MOVIES'
 
@@ -8,7 +8,10 @@ app_name = 'MOVIES'
 urlpatterns = [
     path('api_test/TMDB_GENRE/', views.api_test_TG),  # TMDB 영화 장르
     path('api_test/TMDB_TRENDING/', views.api_test_TT),  # TMDB 트렌딩
-    path('api_test/TMDB_POPULAR/', views.api_test_TP),  # TMDB 인기있는 영화
+    # TMDB popular movies
+    path('api_test/TMDB_POPULAR/', FetchTMDBPopularMovies.as_view()),
+    # Update TMDB movie details
+    path('api_test/TMDB_DETAIL/', UpdateTMDBMovieDetails.as_view()),
     path('', views.movies_main),  # 메인 영화 조회
     path('<int:sort_num>/sort/', views.movie_sort),  # 필터링된 영화 정보(장르 포함)
     path('<int:movie_pk>/', views.movie_detail),  # 단일 영화 조회
