@@ -1,9 +1,10 @@
 <script setup>
   import { ref } from 'vue'
+  import { useMovieStore } from '../../stores/movies'
+  import { useUserStore } from '../../stores/user'
   import MovieTrailer from './MovieTrailer.vue';
-  defineProps({
-    info: Object
-  })
+
+  const store = useMovieStore()
 
   const image = function(path) {
     return `https://image.tmdb.org/t/p/original/${path}`
@@ -14,14 +15,14 @@
   <div class="info">
     <div class="left-box">
       <div class="title-box">
-        <h2 class="title">{{ info.title }}</h2>
-        <span class="text">⭐{{ info.vote_average }}</span>
+        <h2 class="title">{{ store.movieDetail.title }}</h2>
+        <span class="text">⭐{{ store.movieDetail.vote_average }}</span>
       </div>
       <hr>
-      <p class="text"><b class="md-text">상영일</b> - {{ info.release_date }}</p>
+      <p class="text"><b class="md-text">상영일</b> - {{ store.movieDetail.release_date }}</p>
       <p class="text"><b class="md-text">장르</b> - 액션, 코미디</p>
-      <p class="text"><b class="md-text">감독</b> - 미야자키 하야오</p>
-      <p class="text">{{ info.overview }}</p>
+      <p class="text"><b class="md-text">감독</b> - {{ store.movieDetail.director }}</p>
+      <p class="text">{{ store.movieDetail.overview }}</p>
       <hr>
       <div class="buttons">
         <button class="button">
@@ -40,9 +41,9 @@
           <img src="../../assets/youtube.svg" alt="">
         </button>
       </div>
-      <MovieTrailer :movie="info" />
+      <!-- <MovieTrailer :movie="store.movieDetail" /> -->
     </div>
-    <img class="poster" :src=image(info.poster_path) alt="">
+    <img class="poster" :src=image(store.movieDetail.poster_path) alt="">
   </div>
 </template>
 
@@ -57,7 +58,8 @@
     color: white;
     display: flex;
     margin-top: 3rem;
-    gap: 4rem;
+    gap: 2rem;
+    justify-content: space-between;
   }
 
   .left-box {

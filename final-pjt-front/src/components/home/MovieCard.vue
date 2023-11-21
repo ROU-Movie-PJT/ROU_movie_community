@@ -1,20 +1,20 @@
 <script setup>
+  defineProps({
+    item: Object
+  })
 
+  const image = function (path) {
+    return `https://image.tmdb.org/t/p/original/${path}`
+  }
 </script>
 
 <template>
-  <div class="content">
-    <img class="poster" src="../../assets/posterEx.webp" alt="">
-  </div>
+  <img class="poster" :src="image(item.poster_path)" alt="">
 </template>
 
 <style scoped>
-  .content {
-    width: 13%;
-    cursor: pointer;
-  }
-  
   .poster {
     width: 100%;
+    cursor: pointer;
   }
 </style>

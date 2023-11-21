@@ -5,9 +5,9 @@
 </script>
 
 <template>
-  <div class="badge">
+  <a class="badge">
     {{ name }}
-  </div>
+  </a>
 </template>
 
 <style scoped>
@@ -15,5 +15,6 @@
     height: 20px;
     cursor: pointer;
     font-family: 'Pretendard-ExtraLight';
+    text-decoration: none;
   }
 </style>
