@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'MOVIES',
     'ACCOUNTS',
     'COMMUNITY',
-    # 'QUIZ',
+    'QUIZ',
     # 'MESSENGER',
 
     # 3rd party apps

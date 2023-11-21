@@ -449,7 +449,11 @@ def movie_genre(request, genre_id):
 # 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @permission_classes([IsAuthenticatedOrReadOnly])
 def movie_sort(request, sort_num):
-    if sort_num == 1:  # 관객수(popularity)
+    # 장르에 따른 정렬
+    genre_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    if sort_num in genre_ids:
+        sort_movies = movies.filter(genres__id=sort_num).order_by('-release_date')[:30]
+    elif sort_num == 1:  # 관객수(popularity)
         sort_movies = movies.order_by('-popularity')[:30]
     elif sort_num == 2:  # 최신순(개봉한 영화만)
         sort_movies = movies.filter(
@@ -461,72 +465,16 @@ def movie_sort(request, sort_num):
         sort_movies = movies.filter(
             release_date__lte=date.today()).order_by('-vote_average')[:30]
     # 장르 포함
-    elif sort_num == 12:  # 모험
-        sort_movies = movies.filter(
-            genres__id=12).order_by('-release_date')[:30]
-    elif sort_num == 14:  # 판타지
-        sort_movies = movies.filter(
-            genres__id=14).order_by('-release_date')[:30]
-    elif sort_num == 16:  # 애니메이션
-        sort_movies = movies.filter(
-            genres__id=16).order_by('-release_date')[:30]
-    elif sort_num == 18:  # 드라마
-        sort_movies = movies.filter(
-            genres__id=18).order_by('-release_date')[:30]
-    elif sort_num == 27:  # 공포
-        sort_movies = movies.filter(
-            genres__id=27).order_by('-release_date')[:30]
-    elif sort_num == 28:  # 액션
-        sort_movies = movies.filter(
-            genres__id=28).order_by('-release_date')[:30]
-    elif sort_num == 35:  # 코미디
-        sort_movies = movies.filter(
-            genres__id=35).order_by('-release_date')[:30]
-    elif sort_num == 36:  # 역사
-        sort_movies = movies.filter(
-            genres__id=36).order_by('-release_date')[:30]
-    elif sort_num == 37:  # 서부
-        sort_movies = movies.filter(
-            genres__id=37).order_by('-release_date')[:30]
-    elif sort_num == 53:  # 스릴러
-        sort_movies = movies.filter(
-            genres__id=53).order_by('-release_date')[:30]
-    elif sort_num == 80:  # 범죄
-        sort_movies = movies.filter(
-            genres__id=80).order_by('-release_date')[:30]
-    elif sort_num == 99:  # 다큐멘터리
-        sort_movies = movies.filter(
-            genres__id=99).order_by('-release_date')[:30]
-    elif sort_num == 878:  # SF
-        sort_movies = movies.filter(
-            genres__id=878).order_by('-release_date')[:30]
-    elif sort_num == 9648:  # 미스터리
-        sort_movies = movies.filter(
-            genres__id=9648).order_by('-release_date')[:30]
-    elif sort_num == 10402:  # 음악
-        sort_movies = movies.filter(
-            genres__id=10402).order_by('-release_date')[:30]
-    elif sort_num == 10749:  # 로맨스
-        sort_movies = movies.filter(
-            genres__id=10749).order_by('-release_date')[:30]
-    elif sort_num == 10751:  # 가족
-        sort_movies = movies.filter(
-            genres__id=10751).order_by('-release_date')[:30]
-    elif sort_num == 10752:  # 전쟁
-        sort_movies = movies.filter(
-            genres__id=10752).order_by('-release_date')[:30]
-    elif sort_num == 10770:  # TV 영화
-        sort_movies = movies.filter(
-            genres__id=10770).order_by('-release_date')[:30]
-    serializer = MovieSerializer(sort_movies, many=True)
-    return Response(serializer.data)
+    else:
+        return Response({'error': 'Invalid sort number'}, status=status.HTTP_400_BAD_REQUEST)
 
+    return Response(MovieSerializer(sort_movies, many=True).data)
 
 # # (추천)역대급 영화
 # def best_movie(request):
 #     pass
 
 
-# # (추천)날씨별 추천 영화
+# # (추천)날씨별 추천 영화  
 # def for_weather(request):
 #     pass
