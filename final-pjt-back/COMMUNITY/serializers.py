@@ -10,6 +10,18 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+# 상위 게시글 조회
+
+
+class SuperReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Review
+        fields = ('super_review',)
+
+
+
+
 # 상위 댓글 조회
 
 
@@ -103,12 +115,14 @@ class ReviewListSerializer(serializers.ModelSerializer):
     write_review_user = UserSerializer(read_only=True)  # 게시글 작성자
     comment_count = serializers.IntegerField()  # 댓글 수
     like_count = serializers.IntegerField()  # 좋아요 수
+    dislike_count = serializers.IntegerField()  # 싫어요 수
+
 
     class Meta:
         model = Review
         # 전체 게시글 출력 필드
         # id, 제목, 생성 시간, 좋아요 수, 댓글 수, 작성자, 리뷰한 영화 제목
-        fields = ('id', 'title', 'created_at', 'updated_at', 'like_count',
+        fields = ('id', 'title', 'created_at', 'updated_at', 'like_count', 'dislike_count',
                   'comment_count', 'write_review_user', 'write_review_movie')
 
 
@@ -152,3 +166,19 @@ class ReviewLikeSerializer(serializers.ModelSerializer):
         model = Review
         # 게시글 id, 좋아요한 사용자 목록
         fields = ('id', 'like_review_users')
+
+
+# 게시글 싫어요 등록 및 해제
+class ReviewDisLikeSerializer(serializers.ModelSerializer):
+
+    class UserSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields = ('id', 'username',)
+
+    dislike_review_users = UserSerializer(many=True, read_only=True)  # 싫어요한 작성자
+
+    class Meta:
+        model = Review
+        # 게시글 id, 싫어요한 사용자 목록
+        fields = ('id', 'dislike_review_users')

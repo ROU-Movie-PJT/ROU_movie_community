@@ -17,6 +17,13 @@ class Review(models.Model):
     # 게시글을 좋아요한 사용자
     like_review_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name='like_reviews')
+    # 게시글을 싫어요한 사용자
+    dislike_review_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name='dislike_reviews')
+    # 상위 게시글
+    super_review = models.ForeignKey(
+        'self', on_delete=models.CASCADE, related_name='reviewed', null=True, blank=True)
+    
 
 
 class Comment(models.Model):
