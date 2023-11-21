@@ -76,6 +76,18 @@ export const useMovieStore = defineStore('movie', () => {
         movieDetail.value = res.data
       })
   }
+  
+  const movieReview = ref()
 
-  return { recommendMovies, getMovieList, getRecommendMovies, choice, getTrendMovies, trendMovies, movieDetail, getMovieDetail }
+  const getMovieReview = function (movie_pk) {
+    axios({
+      method: 'get',
+      url: `${API_URL}/movies/${movie_pk}/review/`
+    })
+      .then(res => {
+        movieReview.value = res.data.write_movie_review
+      })
+  }
+
+  return { recommendMovies, getMovieList, getRecommendMovies, choice, getTrendMovies, trendMovies, movieDetail, getMovieDetail, movieReview, getMovieReview }
 }, { persist: true })

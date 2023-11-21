@@ -1,13 +1,20 @@
 <script setup>
   import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import { useMovieStore } from '../../stores/movies'
   import { useUserStore } from '../../stores/user'
   import MovieTrailer from './MovieTrailer.vue';
 
   const store = useMovieStore()
+  const userStore = useUserStore()
+  const router = useRouter()
 
   const image = function(path) {
     return `https://image.tmdb.org/t/p/original/${path}`
+  }
+
+  const createReview = function() {
+    router.push({name: 'create', params: {movieId: store.movieDetail.id}})
   }
 </script>
 
@@ -25,21 +32,24 @@
       <p class="text">{{ store.movieDetail.overview }}</p>
       <hr>
       <div class="buttons">
-        <button class="button">
-          <img src="../../assets/watch.svg" alt="">
-        </button>
-        <button class="button">
-          <img src="../../assets/like.svg" alt="">
-        </button>
-        <button class="button">
-          <img src="../../assets/unlike.svg" alt="">
-        </button>
-        <button class="button">
-          <img src="../../assets/favorite.svg" alt="">
-        </button>
-        <button class="button" data-bs-toggle="modal" data-bs-target="#trailerModal" >
-          <img src="../../assets/youtube.svg" alt="">
-        </button>
+        <div class="left-buttons">
+          <button class="button">
+            <img src="../../assets/watch.svg" alt="">
+          </button>
+          <button class="button">
+            <img src="../../assets/like.svg" alt="">
+          </button>
+          <button class="button">
+            <img src="../../assets/unlike.svg" alt="">
+          </button>
+          <button class="button">
+            <img src="../../assets/favorite.svg" alt="">
+          </button>
+          <button class="button" data-bs-toggle="modal" data-bs-target="#trailerModal" >
+            <img src="../../assets/youtube.svg" alt="">
+          </button>
+        </div>
+        <button v-if="userStore.token" class="btn" @click="createReview">리뷰 쓰기</button>
       </div>
       <!-- <MovieTrailer :movie="store.movieDetail" /> -->
     </div>
@@ -59,17 +69,19 @@
     display: flex;
     margin-top: 3rem;
     gap: 2rem;
-    justify-content: space-between;
+    align-items: center;
   }
 
   .left-box {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    flex-grow: 1;
   }
 
   .poster {
     width: 20%;
+    height: 80%;
   }
 
   .text {
@@ -84,8 +96,27 @@
     font-weight: bold;
   }
 
+  .buttons {
+    display: flex;
+    align-items: center;
+  }
+
+  .left-buttons {
+    flex-grow: 1;
+  }
+
   .button {
     border: none;
     background-color: black;
+  }
+
+  .btn {
+    background-color: #7B61FF;
+    color: white;
+  }
+
+  .btn:hover {
+    background-color: #7459fb93;
+    color: white;
   }
 </style>
