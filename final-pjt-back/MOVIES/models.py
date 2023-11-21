@@ -35,9 +35,9 @@ class Movie(models.Model):
     poster_path = models.CharField(max_length=60, blank=True, null=True)
     popularity = models.FloatField()
     overview = models.TextField(null=True, blank=True)
-    genres = models.ManyToManyField(Genre)
-    runtime = models.IntegerField()
-    actors = models.ManyToManyField(Actor)
+    genres = models.ManyToManyField(Genre, blank=True)
+    runtime = models.IntegerField(null=True, blank=True)
+    actors = models.ManyToManyField(Actor, blank=True)
     director = models.CharField(max_length=50, null=True, blank=True)
 
     like_movie_users = models.ManyToManyField(
