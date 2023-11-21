@@ -142,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-KR'
 
 TIME_ZONE = 'UTC'
 
@@ -172,6 +172,14 @@ REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'ACCOUNTS.serializers.ProfileSerializer'
 }
 
+# REST_AUTH_REGISTER_SERIALIZERS = {
+#   'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer',
+# }
+
+# REST_AUTH_SERIALIZERS = {
+#   'USER_DETAILS_SERIALIZER' : 'ACCOUNTS.serializers.ProfileSerializer'
+# }
+
 ACCOUNT_ADAPTER = 'ACCOUNTS.adapters.CustomAccountsAdapter'
 
 AUTHENTICATION_BACKENDS = [
@@ -180,3 +188,5 @@ AUTHENTICATION_BACKENDS = [
     # `allauth` specific authentication methods, such as login by e-mail
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
