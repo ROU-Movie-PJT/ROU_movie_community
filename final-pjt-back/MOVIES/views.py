@@ -19,7 +19,7 @@ import asyncio
 import logging  # 추가: 로깅을 위한 임포트
 from rest_framework.views import APIView  # 추가
 from rest_framework.response import Response
-
+from django.views.decorators.cache import cache_page
 
 User = get_user_model()
 
@@ -445,6 +445,7 @@ def movie_genre(request, genre_id):
 
 
 # 필터링된 영화 정보
+@cache_page(60 * 30) # Cache for 15 minutes
 @api_view(['GET'])
 # 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @permission_classes([IsAuthenticatedOrReadOnly])
