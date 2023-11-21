@@ -27,6 +27,6 @@ urlpatterns = [
     path('accounts/', include('dj_rest_auth.urls')),
     path('accounts/signup/', include('dj_rest_auth.registration.urls')),
     path('community/', include('COMMUNITY.urls')),
-    # path('quiz/', include('QUIZ.urls')),
+    path('quiz/', include('QUIZ.urls')),
     # path('messenger/', include('MESSENGER.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
