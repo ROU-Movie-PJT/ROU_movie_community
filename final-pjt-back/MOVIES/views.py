@@ -453,15 +453,15 @@ def movie_sort(request, sort_num):
     genre_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     if sort_num in genre_ids:
         sort_movies = movies.filter(genres__id=sort_num).order_by('-release_date')[:30]
-    elif sort_num == 1:  # 관객수(popularity)
+    elif sort_num == 20:  # 관객수(popularity)
         sort_movies = movies.order_by('-popularity')[:30]
-    elif sort_num == 2:  # 최신순(개봉한 영화만)
+    elif sort_num == 21:  # 최신순(개봉한 영화만)
         sort_movies = movies.filter(
             release_date__lte=date.today()).order_by('-release_date')[:30]
-    elif sort_num == 3:  # 개봉예정작 : 빠른 개봉 순으로
+    elif sort_num == 22:  # 개봉예정작 : 빠른 개봉 순으로
         sort_movies = movies.filter(
             release_date__gt=date.today()).order_by('release_date')[:30]
-    elif sort_num == 5:  # 평점순(vote_average/개봉한 영화)
+    elif sort_num == 23:  # 평점순(vote_average/개봉한 영화)
         sort_movies = movies.filter(
             release_date__lte=date.today()).order_by('-vote_average')[:30]
     # 장르 포함
