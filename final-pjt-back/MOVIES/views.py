@@ -445,15 +445,17 @@ def movie_genre(request, genre_id):
 
 
 # 필터링된 영화 정보
-@cache_page(60 * 30) # Cache for 15 minutes
+@cache_page(60 * 30)  # Cache for 15 minutes
 @api_view(['GET'])
 # 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @permission_classes([IsAuthenticatedOrReadOnly])
 def movie_sort(request, sort_num):
     # 장르에 따른 정렬
-    genre_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    genre_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9,
+                 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     if sort_num in genre_ids:
-        sort_movies = movies.filter(genres__id=sort_num).order_by('-release_date')[:30]
+        sort_movies = movies.filter(
+            genres__id=sort_num).order_by('-release_date')[:30]
     elif sort_num == 20:  # 관객수(popularity)
         sort_movies = movies.order_by('-popularity')[:30]
     elif sort_num == 21:  # 최신순(개봉한 영화만)
@@ -476,6 +478,13 @@ def movie_sort(request, sort_num):
 #     pass
 
 
-# # (추천)날씨별 추천 영화  
+# # (추천)날씨별 추천 영화
 # def for_weather(request):
 #     pass
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def actor_detail(request, actor_pk):
+    actor = Actor.objects.get(pk=actor_pk)
+    serializer = ActorSerializer(actor)
+    return Response(serializer.data)
