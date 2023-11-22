@@ -21,11 +21,14 @@ class Trend(models.Model):
     movie_id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=100)
     poster_path = models.CharField(max_length=60, blank=True, null=True)
+
     videos = models.TextField(null=True, blank=True)
     def create(self, validated_data):
         movie_id = validated_data.pop('movie_id', None)  # movie_id를 추출
         instance = Trend.objects.create(**validated_data, movie_id=movie_id)
         return instance
+
+
 
 
 # TMDB popular 영화 목록

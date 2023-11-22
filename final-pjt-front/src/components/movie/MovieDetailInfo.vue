@@ -33,18 +33,41 @@
       <hr>
       <div class="buttons">
         <div class="left-buttons">
-          <button class="button">
-            <img src="../../assets/watch.svg" alt="">
-          </button>
-          <button class="button">
-            <img src="../../assets/like.svg" alt="">
-          </button>
-          <button class="button">
-            <img src="../../assets/unlike.svg" alt="">
-          </button>
-          <button class="button">
-            <img src="../../assets/favorite.svg" alt="">
-          </button>
+          <div class="watch-button btn-box">
+            <button v-if="store.movieDetail.isWatch" class="button">
+              <img src="../../assets/watch_fill.svg" alt="">
+            </button>
+            <button v-else class="button">
+              <img src="../../assets/watch.svg" alt="">
+            </button>
+          </div>
+          <div class="like-button btn-box">
+            <button v-if="store.movieDetail.isLike" class="button">
+              <img src="../../assets/like_fill.svg" alt="">
+            </button>
+            <button v-else class="button">
+              <img src="../../assets/like.svg" alt="">
+            </button>
+            <span>{{ store.movieDetail.like_movie_users_count }}</span>
+          </div>
+          <div class="unlike-button btn-box">
+            <button v-if="store.movieDetail.isDislike" class="button">
+              <img src="../../assets/unlike_fill.svg" alt="">
+            </button>
+            <button v-else class="button">
+              <img src="../../assets/unlike.svg" alt="">
+            </button>
+            <span>{{ store.movieDetail.dislike_movie_users_count }}</span>
+          </div>
+          <div class="favorite-button btn-box">
+            <button v-if="store.movieDetail.isFavorite" class="button">
+              <img src="../../assets/favorite_fill.svg" alt="">
+            </button>
+            <button v-else class="button">
+              <img src="../../assets/favorite.svg" alt="">
+            </button>
+            <span>{{ store.movieDetail.favorite_movie_users_count }}</span>
+          </div>
           <button class="button" data-bs-toggle="modal" data-bs-target="#trailerModal" >
             <img src="../../assets/youtube.svg" alt="">
           </button>
@@ -102,7 +125,10 @@
   }
 
   .left-buttons {
+    display: flex;
+    align-items: center;
     flex-grow: 1;
+    gap: .5rem
   }
 
   .button {
@@ -118,5 +144,10 @@
   .btn:hover {
     background-color: #7459fb93;
     color: white;
+  }
+
+  .btn-box {
+    display: flex;
+    align-items: center;
   }
 </style>
