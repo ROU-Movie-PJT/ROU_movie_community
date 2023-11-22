@@ -53,7 +53,9 @@ class TrendSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('movie_id', 'release_date',)
 
-class MovieDetailSerializer(serializers.ModelSerializer):
+
+class MovieSerializer(serializers.ModelSerializer):
+
     class GenreSerializer(serializers.ModelSerializer):
 
         class Meta:
@@ -67,18 +69,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
             model = Actor
             # 단일 컬럼 출력 시 ,(콤마) 필수(없으면 인식 못함)
             fields = '__all__'
-    
-    actors = ActorSerializer(many=True)
-    genres = GenreSerializer(many=True)
-    like_movie_users_count = serializers.IntegerField(source='like_movie_users.count', read_only=True)
-    dislike_movie_users_count = serializers.IntegerField(source='dislike_movie_users.count', read_only=True)
-    favorite_movie_users_count = serializers.IntegerField(source='favorite_movie_users.count', read_only=True)
 
-    class Meta:
-        model = Movie
-        fields = '__all__'
-
-class MovieSerializer(serializers.ModelSerializer):
     genres = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Genre.objects.all(),
@@ -91,8 +82,6 @@ class MovieSerializer(serializers.ModelSerializer):
         required=False  # 변경: 필드를 선택적으로 만듭니다.
     )
     
-
-
     like_movie_users_count = serializers.IntegerField(
         read_only=True)  # 좋아요한 사용자 수
     dislike_movie_users_count = serializers.IntegerField(

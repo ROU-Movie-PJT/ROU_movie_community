@@ -231,18 +231,9 @@ def movies_main(request):
 @permission_classes([IsAuthenticatedOrReadOnly])
 def movie_detail(request, movie_pk):
     movie = movies.get(pk=movie_pk)
-    serializer = MovieDetailSerializer(movie)
+    serializer = MovieSerializer(movie)
+    return Response(serializer.data)
 
-    data = {
-        'isLike': movie.like_movie_users.filter(pk=request.user.pk).exists(),
-        'isFavorite': movie.favorite_movie_users.filter(pk=request.user.pk).exists(),
-        'isDislike': movie.dislike_movie_users.filter(pk=request.user.pk).exists(), 
-        'isWatch': movie.watching_movie_users.filter(pk=request.user.pk).exists()
-    }
-
-    data.update(serializer.data)
-
-    return JsonResponse(data)
 
 # # 영화별 게시글 조회
 @api_view(['GET'])
@@ -266,12 +257,10 @@ def movie_like(request, movie_pk):
     # 해제
     if movie.like_movie_users.filter(pk=user.pk).exists():
         movie.like_movie_users.remove(user)
-        isLike = False
 
     # 등록
     else:
         movie.like_movie_users.add(user)
-        isLike = True
 
     serializer = MovieLikeSerializer(movie)
 
@@ -279,7 +268,6 @@ def movie_like(request, movie_pk):
         'id': serializer.data.get('id'),
         'like_movie_users_count': movie.like_movie_users.count(),
         'like_movie_users': serializer.data.get('like_movie_users'),
-        'isLike': isLike
     }
     return JsonResponse(like_movie_register)
 
@@ -296,12 +284,10 @@ def movie_dislike(request, movie_pk):
     # 해제
     if movie.dislike_movie_users.filter(pk=user.pk).exists():
         movie.dislike_movie_users.remove(user)
-        isDislike = False
 
     # 등록
     else:
         movie.dislike_movie_users.add(user)
-        isDislike = True
 
     serializer = MovieDisLikeSerializer(movie)
 
@@ -309,7 +295,6 @@ def movie_dislike(request, movie_pk):
         'id': serializer.data.get('id'),
         'dislike_movie_users_count': movie.dislike_movie_users.count(),
         'dislike_movie_users': serializer.data.get('dislike_movie_users'),
-        'isDislike': isDislike
     }
     return JsonResponse(dislike_movie_register)
 
@@ -325,11 +310,10 @@ def movie_watching(request, movie_pk):
     # 해제
     if movie.watching_movie_users.filter(pk=user.pk).exists():
         movie.watching_movie_users.remove(user)
-        isWatch = False
+
     # 등록
     else:
         movie.watching_movie_users.add(user)
-        isWatch = True
 
     serializer = MovieWatchingSerializer(movie)
 
@@ -337,7 +321,6 @@ def movie_watching(request, movie_pk):
         'id': serializer.data.get('id'),
         'watching_movie_users_count': movie.watching_movie_users.count(),
         'watching_movie_users': serializer.data.get('watching_movie_users'),
-        'isWatch': isWatch
     }
     return JsonResponse(watching_movie_register)
 
@@ -353,18 +336,17 @@ def movie_favorite(request, movie_pk):
     # 해제
     if movie.favorite_movie_users.filter(pk=user.pk).exists():
         movie.favorite_movie_users.remove(user)
-        isFavorite = False
+
     # 등록
     else:
         movie.favorite_movie_users.add(user)
-        isFavorite = True
+
     serializer = MovieFavoriteSerializer(movie)
 
     favorite_movie_register = {
         'id': serializer.data.get('id'),
         'favorite_movie_users_count': movie.favorite_movie_users.count(),
         'favorite_movie_users': serializer.data.get('favorite_movie_users'),
-        'isFavorite': isFavorite
     }
     return JsonResponse(favorite_movie_register)
 
@@ -392,7 +374,7 @@ def movie_genre(request, genre_id):
 
 
 # 필터링된 영화 정보
-# @cache_page(60 * 30)  # Cache for 15 minutes
+@cache_page(60 * 30)  # Cache for 15 minutes
 @api_view(['GET'])
 # 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @permission_classes([IsAuthenticatedOrReadOnly])
