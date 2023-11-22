@@ -22,9 +22,36 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TrendSerializer(serializers.ModelSerializer):
+    class GenreSerializer(serializers.ModelSerializer):
+
+        class Meta:
+            model = Genre
+            # 단일 컬럼 출력 시 ,(콤마) 필수(없으면 인식 못함)
+            fields = '__all__'
+
+    class ActorSerializer(serializers.ModelSerializer):
+
+        class Meta:
+            model = Actor
+            # 단일 컬럼 출력 시 ,(콤마) 필수(없으면 인식 못함)
+            fields = '__all__'
+
+    genres = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Genre.objects.all(),
+        required=False  # 변경: 필드를 선택적으로 만듭니다.
+    )
+
+    actors = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Actor.objects.all(),
+        required=False  # 변경: 필드를 선택적으로 만듭니다.
+    )
+
     class Meta:
         model = Trend
         fields = '__all__'
+        read_only_fields = ('movie_id', 'release_date',)
 
 
 class MovieSerializer(serializers.ModelSerializer):

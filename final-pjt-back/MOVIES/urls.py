@@ -26,6 +26,7 @@ urlpatterns = [
     path('<int:movie_pk>/favorite/', views.movie_favorite),
     path('trend/', views.movie_trend),  # 박스오피스 인기 영화 조회
     path('<int:genre_id>/genre/', views.movie_genre),  # 장르별 추천 영화 조회
+    path('actor/<int:actor_pk>/', views.actor_detail),
     # path('recommend/the_best_movie/', views.best_movie),  # 역대급 영화
     # path('recommend/for_weather/', views.for_weather),  # 날씨별 추천 영화
 ]

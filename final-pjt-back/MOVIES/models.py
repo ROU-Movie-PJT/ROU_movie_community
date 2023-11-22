@@ -20,6 +20,10 @@ class Genre(models.Model):
 class Trend(models.Model):
     title = models.CharField(max_length=100)
     poster_path = models.CharField(max_length=60, blank=True, null=True)
+    genres = models.ManyToManyField(Genre, blank=True)
+    release_date = models.DateField(blank=True, null=True)
+    vote_average = models.FloatField()
+    vote_count = models.IntegerField()
 
 
 # TMDB popular 영화 목록
