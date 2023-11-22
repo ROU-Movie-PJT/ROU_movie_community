@@ -21,6 +21,58 @@ from rest_framework.views import APIView  # 추가
 from rest_framework.response import Response
 from django.views.decorators.cache import cache_page
 from .recommend import recommend_movies
+from django.db.models import Q
+from django.contrib.postgres.search import SearchVector, SearchQuery
+from .models import Movie, Actor, Genre
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+# 영화 검색 기능
+
+
+def search_movies(query, actor_name=None, genre_name=None):
+    queryset = Movie.objects.all()
+
+    if query:
+        queryset = queryset.filter(
+            Q(title__icontains=query) | Q(overview__icontains=query)
+        )
+
+    if actor_name:
+        queryset = queryset.filter(actors__name__icontains=actor_name)
+
+    if genre_name:
+        queryset = queryset.filter(genres__name__icontains=genre_name)
+
+    return queryset
+
+
+# Example usage
+# search_results = search_movies(
+#     query="Inception", actor_name="Leonardo DiCaprio", genre_name="Sci-Fi")
+
+
+# @csrf_exempt
+@require_http_methods(["GET", "POST"])
+def search_view(request):
+    # return JsonResponse({'status': 'success'})
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            query = data.get('q', '')
+            actor_name = data.get('actor_name', '')
+            genre_name = data.get('genre_name', '')
+            # Your search logic...
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    else:
+        query = request.GET.get('q', '')
+        actor_name = request.GET.get('actor', '')
+        genre_name = request.GET.get('genre', '')
+    print(search_movies(query, actor_name, genre_name))
+    results = search_movies(query, actor_name, genre_name)
+    serializer = MovieSerializer(results, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
 
 User = get_user_model()
 
@@ -50,20 +102,21 @@ TMDB_TRENDING_BASE_URL = 'https://api.themoviedb.org/3/trending/movie/day'
 TMDB_API_KEY = '49d792ca8a7053508d689eedb328f369'
 
 
-
 def api_test_video(request):
     movies = Movie.objects.all()
     for movie in movies:
         movie_id = movie.movie_id
-        detail_params = {'language': 'ko-KR', 'api_key': TMDB_API_KEY, 'append_to_response': 'credits,videos'}
+        detail_params = {'language': 'ko-KR', 'api_key': TMDB_API_KEY,
+                         'append_to_response': 'credits,videos'}
         try:
-            response = requests.get(f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=detail_params).json()
-            
+            response = requests.get(
+                f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=detail_params).json()
+
             # Debugging: Check the response
             # print(f"Response for movie ID {movie_id}: ", response)
 
             videos = response['videos']['results']
-            
+
             # Debugging: Check the videos list
             # print(f"Videos for movie ID {movie_id}: ", videos)
             videos = response.get('videos', {}).get('results')
@@ -72,13 +125,15 @@ def api_test_video(request):
             else:
                 movie.videos = None
             print(movie)
-        
+
             movie.runtime = response.get('runtime', None)
-            
+
             crew_list = response['credits']['crew']
-            director = next((crew['name'] for crew in crew_list if crew['job'] == 'Director'), None)
+            director = next(
+                (crew['name'] for crew in crew_list if crew['job'] == 'Director'), None)
             movie.director = director  # 속성 접근 방식 사용
-            print(f"Director for movie ID {movie_id}: ", director)  # Debug print
+            # Debug print
+            print(f"Director for movie ID {movie_id}: ", director)
 
             movie.save()  # 업데이트된 모델 저장
 
@@ -89,6 +144,8 @@ def api_test_video(request):
     return JsonResponse({'message': 'Success'})
 
 # TMDB 영화 트렌드
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def api_test_TT(request):
@@ -99,7 +156,6 @@ def api_test_TT(request):
     }
     response = requests.get(TMDB_TRENDING_BASE_URL, params=params).json()
     movies_trend = response['results']
-    
 
     for movie in movies_trend:
         trend_serializer = TrendSerializer(data=movie)
@@ -109,14 +165,15 @@ def api_test_TT(request):
     return JsonResponse({'message': 'Success'})
 
 
-
 def api_test_video2(request):
     movies = Trend.objects.all()
     for movie in movies:
         movie_id = movie.movie_id
-        detail_params = {'language': 'ko-KR', 'api_key': TMDB_API_KEY, 'append_to_response': 'videos'}
+        detail_params = {'language': 'ko-KR',
+                         'api_key': TMDB_API_KEY, 'append_to_response': 'videos'}
         try:
-            response = requests.get(f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=detail_params).json()
+            response = requests.get(
+                f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=detail_params).json()
             videos = response.get('videos', {}).get('results')
             if videos:
                 movie.videos = videos[0].get('key')
@@ -274,6 +331,7 @@ def movie_like(request, movie_pk):
 # 영화 싫어요 등록 및 해제(싫어요 수까지 출력)
 # 인증된 사용자만 권한 허용
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def movie_dislike(request, movie_pk):
@@ -400,7 +458,6 @@ def movie_sort(request, sort_num):
         return Response({'error': 'Invalid sort number'}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(MovieSerializer(sort_movies, many=True).data)
-
 
 
 @api_view(['GET'])

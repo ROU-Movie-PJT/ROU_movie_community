@@ -18,15 +18,17 @@ urlpatterns = [
     path('<int:sort_num>/sort/', views.movie_sort),  # 필터링된 영화 정보(장르 포함)
     path('<int:movie_pk>/', views.movie_detail),  # 단일 영화 조회
     path('<int:movie_pk>/review/', views.movie_review),  # 영화별 게시글 조회
-    path('<int:movie_pk>/like/', views.movie_like), # 영화 좋아요 등록 및 해제(좋아요 수까지 출력)
-    path('<int:movie_pk>/dislike/', views.movie_dislike), # 영화 싫어요 등록 및 해제(싫어요 수까지 출력)
-    path('<int:movie_pk>/watching/', views.movie_watching), # 시청 중인 영화 등록 및 해제(시청 수까지 출력)
-    path('<int:movie_pk>/favorite/', views.movie_favorite), # 찜한 영화 등록 및 해제(찜한 수까지 출력)
+    # 영화 좋아요 등록 및 해제(좋아요 수까지 출력)
+    path('<int:movie_pk>/like/', views.movie_like),
+    # 영화 싫어요 등록 및 해제(싫어요 수까지 출력)
+    path('<int:movie_pk>/dislike/', views.movie_dislike),
+    # 시청 중인 영화 등록 및 해제(시청 수까지 출력)
+    path('<int:movie_pk>/watching/', views.movie_watching),
+    # 찜한 영화 등록 및 해제(찜한 수까지 출력)
+    path('<int:movie_pk>/favorite/', views.movie_favorite),
     path('trend/', views.movie_trend),  # 박스오피스 인기 영화 조회
     path('<int:genre_id>/genre/', views.movie_genre),  # 장르별 추천 영화 조회
     path('actor/<int:actor_id>/', views.person_detail),
-    path('recommend/<str:title>/', views.movie_recommendation, name='movie_recommendation'),
+    path('recommend/<str:title>/', views.movie_recommendation),
+    path('search/', views.search_view),  # 검색
 ]
-
-
-
