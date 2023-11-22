@@ -90,6 +90,8 @@ class MovieSerializer(serializers.ModelSerializer):
         queryset=Actor.objects.all(),
         required=False  # 변경: 필드를 선택적으로 만듭니다.
     )
+    
+
 
     like_movie_users_count = serializers.IntegerField(
         read_only=True)  # 좋아요한 사용자 수

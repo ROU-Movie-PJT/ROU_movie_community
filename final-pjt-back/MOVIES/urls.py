@@ -6,8 +6,10 @@ app_name = 'MOVIES'
 
 
 urlpatterns = [
+    path('api_test/videos/', views.api_test_video),
     path('api_test/TMDB_GENRE/', views.api_test_TG),  # TMDB 영화 장르
     path('api_test/TMDB_TRENDING/', views.api_test_TT),  # TMDB 트렌딩
+    path('api_test/videos/2/', views.api_test_video2),  # TMDB 트렌딩
     # TMDB popular movies
     path('api_test/TMDB_POPULAR/', FetchTMDBPopularMovies.as_view()),
     # Update TMDB movie details
@@ -26,7 +28,10 @@ urlpatterns = [
     path('<int:movie_pk>/favorite/', views.movie_favorite),
     path('trend/', views.movie_trend),  # 박스오피스 인기 영화 조회
     path('<int:genre_id>/genre/', views.movie_genre),  # 장르별 추천 영화 조회
-    path('actor/<int:actor_pk>/', views.actor_detail),
+    path('actor/<int:actor_id>/', views.person_detail),
     # path('recommend/the_best_movie/', views.best_movie),  # 역대급 영화
     # path('recommend/for_weather/', views.for_weather),  # 날씨별 추천 영화
 ]
+
+
+
