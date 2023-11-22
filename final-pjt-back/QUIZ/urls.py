@@ -5,9 +5,9 @@ app_name = 'QUIZ'
 
 
 urlpatterns = [
-    path('', views.index),  # 전체 문제 
-    path('<int:quiz_pk>/', views.quiz_detail),  # 단일 문제 조회
-    path('<int:quiz_pk>/quiz_item/', views.quiz_item_detail),  # 단일 문제 조회
-    # path('/start/', views.start),  # 
-    # path('/result/', views.result),  # 결과 나옴 
+    path('', views.index),  # 모든 퀴즈 조회
+    path('<int:quiz_pk>/', views.quiz_detail),  # 단일 퀴즈 조회/관리
+    path('<int:quiz_pk>/quiz_item/', views.quiz_item_detail),  # 퀴즈 아이템 관리
+    path('<int:quiz_pk>/submit/', views.submit_quiz),  # 퀴즈 답변 제출
+    path('user_correct_quiz_count/', views.user_correct_quiz_count),  # 사용자의 정답 수 확인
 ]
