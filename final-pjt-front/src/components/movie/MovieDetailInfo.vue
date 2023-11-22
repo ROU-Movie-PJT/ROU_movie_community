@@ -3,7 +3,8 @@
   import { useRouter } from 'vue-router'
   import { useMovieStore } from '../../stores/movies'
   import { useUserStore } from '../../stores/user'
-  import MovieTrailer from './MovieTrailer.vue';
+  import MovieTrailer from './MovieTrailer.vue'
+  import Badge from '../common/Badge.vue'
 
   const store = useMovieStore()
   const userStore = useUserStore()
@@ -27,43 +28,43 @@
       </div>
       <hr>
       <p class="text"><b class="md-text">상영일</b> - {{ store.movieDetail.release_date }}</p>
-      <p class="text"><b class="md-text">장르</b> - 액션, 코미디</p>
+      <p class="text"><b class="md-text">장르</b> - <Badge class="genre text-bg-signature" v-for="genre in store.movieDetail.genres" :name="genre.name" /></p>
       <p class="text"><b class="md-text">감독</b> - {{ store.movieDetail.director }}</p>
       <p class="text">{{ store.movieDetail.overview }}</p>
       <hr>
       <div class="buttons">
         <div class="left-buttons">
           <div class="watch-button btn-box">
-            <button v-if="store.movieDetail.isWatch" class="button">
+            <button v-if="store.movieDetail.isWatch" class="button" @click.prevent="store.watchMovie">
               <img src="../../assets/watch_fill.svg" alt="">
             </button>
-            <button v-else class="button">
+            <button v-else class="button" @click.prevent="store.watchMovie">
               <img src="../../assets/watch.svg" alt="">
             </button>
           </div>
           <div class="like-button btn-box">
-            <button v-if="store.movieDetail.isLike" class="button">
+            <button v-if="store.movieDetail.isLike" class="button" @click.prevent="store.likeMovie">
               <img src="../../assets/like_fill.svg" alt="">
             </button>
-            <button v-else class="button">
+            <button v-else class="button" @click.prevent="store.likeMovie">
               <img src="../../assets/like.svg" alt="">
             </button>
             <span>{{ store.movieDetail.like_movie_users_count }}</span>
           </div>
           <div class="unlike-button btn-box">
-            <button v-if="store.movieDetail.isDislike" class="button">
+            <button v-if="store.movieDetail.isDislike" class="button" @click.prevent="store.unlikeMovie">
               <img src="../../assets/unlike_fill.svg" alt="">
             </button>
-            <button v-else class="button">
+            <button v-else class="button" @click.prevent="store.unlikeMovie">
               <img src="../../assets/unlike.svg" alt="">
             </button>
             <span>{{ store.movieDetail.dislike_movie_users_count }}</span>
           </div>
           <div class="favorite-button btn-box">
-            <button v-if="store.movieDetail.isFavorite" class="button">
+            <button v-if="store.movieDetail.isFavorite" class="button" @click.prevent="store.favoriteMovie">
               <img src="../../assets/favorite_fill.svg" alt="">
             </button>
-            <button v-else class="button">
+            <button v-else class="button" @click.prevent="store.favoriteMovie">
               <img src="../../assets/favorite.svg" alt="">
             </button>
             <span>{{ store.movieDetail.favorite_movie_users_count }}</span>
@@ -149,5 +150,15 @@
   .btn-box {
     display: flex;
     align-items: center;
+  }
+
+  .genre {
+    margin: 0 .25rem;
+  }
+
+  .text-bg-signature {
+    color: white;
+    background-color: #7B61FF;
+    cursor: default;
   }
 </style>

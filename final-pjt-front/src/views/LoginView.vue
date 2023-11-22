@@ -22,7 +22,7 @@
   <div class="content-box">
     <div class="login-box">
       <h2><b>로그인</b></h2>
-      <form class="login-form">
+      <form class="login-form" @submit.prevent="login">
         <div class="login-item">
           <label for="username">아이디</label>
           <input required class="input" type="text" id="username" v-model="username">
@@ -33,7 +33,7 @@
         </div>
         <hr>
         <span class="sm-font" v-if="store.loginErrMsg.non_field_errors">* {{ store.loginErrMsg.non_field_errors }}</span>
-        <button type="submit" @click.prevent="login" class="login-btn">로그인</button>
+        <button type="submit" class="login-btn">로그인</button>
       </form>
       <RouterLink :to="{name: 'register'}">회원가입</RouterLink>
     </div>

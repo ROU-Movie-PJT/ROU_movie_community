@@ -23,8 +23,6 @@ class Review(models.Model):
     # 상위 게시글
     super_review = models.ForeignKey(
         'self', on_delete=models.CASCADE, related_name='reviewed', null=True, blank=True)
-    
-
 
 class Comment(models.Model):
     content = models.CharField(max_length=20)

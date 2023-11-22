@@ -1,9 +1,12 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { useUserStore } from './user'
+import _ from 'lodash'
 
 export const useMovieStore = defineStore('movie', () => {
   const API_URL = 'http://127.0.0.1:8000'
+  const userStore = useUserStore()
 
   const recommendMovies = ref({})
 
@@ -59,9 +62,6 @@ export const useMovieStore = defineStore('movie', () => {
     })
       .then(res => {
         trendMovies.value = res.data
-        for (const movie in trendMovies.value) {
-          console.log(trendMovies.value[movie].title)
-        }
       })
   }
 
@@ -71,6 +71,9 @@ export const useMovieStore = defineStore('movie', () => {
     axios({
       method: 'get',
       url: `${API_URL}/movies/${movie_pk}`,
+      headers: {
+        Authorization: userStore.token ? `Token ${userStore.token}`: null
+      }
     })
       .then(res => {
         movieDetail.value = res.data
@@ -86,8 +89,102 @@ export const useMovieStore = defineStore('movie', () => {
     })
       .then(res => {
         movieReview.value = res.data.write_movie_review
+        movieReview.value.comment_count = res.data.comment_count
       })
   }
 
-  return { recommendMovies, getMovieList, getRecommendMovies, choice, getTrendMovies, trendMovies, movieDetail, getMovieDetail, movieReview, getMovieReview }
+  const watchMovie = function () {
+    axios({
+      method: 'post',
+      url: `${API_URL}/movies/${movieDetail.value.id}/watching/`,
+      headers: {
+        Authorization: `Token ${userStore.token}`
+      }
+    })
+      .then(res => {
+        movieDetail.value.watching_movie_users_count = res.data.watching_movie_users_count
+        movieDetail.value.watching_movie_users = res.data.watching_movie_users
+        movieDetail.value.isWatch = res.data.isWatch
+      })
+  }
+
+  const likeMovie = function () {
+    axios({
+      method: 'post',
+      url: `${API_URL}/movies/${movieDetail.value.id}/like/`,
+      headers: {
+        Authorization: `Token ${userStore.token}`
+      }
+    })
+      .then(res => {
+        movieDetail.value.like_movie_users_count = res.data.like_movie_users_count
+        movieDetail.value.like_movie_users = res.data.like_movie_users
+        movieDetail.value.isLike = res.data.isLike
+      })
+  }
+
+  const unlikeMovie = function () {
+    axios({
+      method: 'post',
+      url: `${API_URL}/movies/${movieDetail.value.id}/dislike/`,
+      headers: {
+        Authorization: `Token ${userStore.token}`
+      }
+    })
+      .then(res => {
+        movieDetail.value.dislike_movie_users_count = res.data.dislike_movie_users_count
+        movieDetail.value.dislike_movie_users = res.data.dislike_movie_users
+        movieDetail.value.isDislike = res.data.isDislike
+      })
+  }
+
+  const favoriteMovie = function () {
+    axios({
+      method: 'post',
+      url: `${API_URL}/movies/${movieDetail.value.id}/favorite/`,
+      headers: {
+        Authorization: `Token ${userStore.token}`
+      }
+    })
+      .then(res => {
+        movieDetail.value.favorite_movie_users_count = res.data.favorite_movie_users_count
+        movieDetail.value.favorite_movie_users = res.data.favorite_movie_users
+        movieDetail.value.isFavorite = res.data.isFavorite
+      })
+  }
+
+  const genreRecommendMovies = ref([])
+
+  const getGenreRecommendMovies = function(genres) {
+    genreRecommendMovies.value = []
+    for (const key in genres) {
+      axios({
+        method: 'get',
+        url: `${API_URL}/movies/${genres[key].id}/genre/`
+      })
+        .then(res => {
+          genreRecommendMovies.value = genreRecommendMovies.value.concat(res.data)
+          genreRecommendMovies.value = _.uniqBy(genreRecommendMovies.value, 'movie_id')
+        })
+    }
+  }
+
+  return { 
+    recommendMovies, 
+    getMovieList, 
+    getRecommendMovies, 
+    choice, 
+    getTrendMovies, 
+    trendMovies, 
+    movieDetail, 
+    getMovieDetail, 
+    movieReview, 
+    getMovieReview, 
+    watchMovie, 
+    likeMovie, 
+    unlikeMovie, 
+    favoriteMovie,
+    getGenreRecommendMovies,
+    genreRecommendMovies
+  }
 }, { persist: true })

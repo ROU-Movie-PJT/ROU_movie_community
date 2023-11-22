@@ -442,7 +442,6 @@ def movie_like(request, movie_pk):
 # 영화 싫어요 등록 및 해제(싫어요 수까지 출력)
 # 인증된 사용자만 권한 허용
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def movie_dislike(request, movie_pk):
@@ -542,7 +541,7 @@ def movie_trend(request):
 def movie_genre(request, genre_id):
     genre_movie = movies.filter(
         genres=genre_id,
-        release_date__lte=date.today()).order_by('?')[:10]
+        release_date__lte=date.today()).order_by('-popularity')[:10]
     serializer = MovieSerializer(genre_movie, many=True)
     return Response(serializer.data)
 

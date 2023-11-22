@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
-from dj_rest_auth.serializers import LoginSerializer
+from dj_rest_auth.serializers import TokenSerializer
 from dj_rest_auth.serializers import UserDetailsSerializer
 from django.contrib.auth import get_user_model
 from MOVIES.serializers import GenreSerializer
 from MOVIES.models import Movie
+from rest_framework.authtoken.models import Token
 
 User = get_user_model()
 
@@ -75,3 +76,8 @@ class LikeGenreSerializer(serializers.ModelSerializer):
   class Meta:
     model = User
     fields = ('id', 'username', 'like_genres', )
+
+class CustomTokenSerializer(TokenSerializer):
+   class Meta:
+    model = Token
+    fields = ('key', 'user',)

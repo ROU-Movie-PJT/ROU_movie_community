@@ -2,7 +2,7 @@ from rest_framework import serializers
 from COMMUNITY.models import Review
 from .models import *
 from django.contrib.auth import get_user_model
-
+from COMMUNITY.models import *
 
 User = get_user_model()
 
@@ -118,8 +118,14 @@ class MovieReviewSerializer(serializers.ModelSerializer):
                 model = User
                 fields = ('id', 'username', 'profile_image')
 
-        write_review_user = UserSerializer()
+        class CommentSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = Comment
+                fields = '__all__'
 
+        write_review_user = UserSerializer()
+        review_comment = CommentSerializer(many=True)
+        comment_count = serializers.IntegerField(source='review_comment.count', read_only=True)
         class Meta:
             model = Review
             fields = '__all__'

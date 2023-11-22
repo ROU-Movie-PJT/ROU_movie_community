@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 export const useUserStore = defineStore('user', () => {
   const router = useRouter()
   const token = ref(null)
+  const user = ref(null)
   const API_URL = 'http://127.0.0.1:8000'
 
   const registerErrMsg = ref({})
@@ -56,9 +57,11 @@ export const useUserStore = defineStore('user', () => {
       .then(res => {
         loginErrMsg.value = {}
         token.value = res.data.key
+        user.value = res.data.user
+        localStorage.setItem('username', username)
         console.log('로그인 성공')
         router.push({name: 'home'})
-        username.value = username
+
       })
       .catch(err => {
         loginErrMsg.value = {}
@@ -76,6 +79,7 @@ export const useUserStore = defineStore('user', () => {
     })
       .then(() => {
         token.value = null
+        localStorage.setItem('username', '')
         router.push({name: 'home'})
       })
   }
@@ -88,5 +92,41 @@ export const useUserStore = defineStore('user', () => {
     }
   })
 
-  return {token, API_URL, register, registerErrMsg, login, loginErrMsg, isLogin, logout}
+  const userInfo = ref()
+
+  const getUserInfo = function () {
+    axios({
+      method: 'get',
+      url: `${API_URL}/accounts/profile/${user.value}/`,
+      headers: {
+        Authorization: `Token ${token.value}`
+      }
+    })
+      .then(res => {
+        userInfo.value = res.data
+      })
+  }
+
+  const updateUserInfo = function (payload) {
+    const profileImage = payload.profileImage
+    const region = payload.region
+    const birth = payload.birth
+    axios({
+      method: 'put',
+      url: `${API_URL}/accounts/profile/${user.value}/`,
+      headers: {
+        Authorization: `Token ${token.value}`
+      },
+      data: {
+        profileImage,
+        region,
+        birth
+      }
+    })
+      .then(res => {
+        userInfo.value = res.data
+      })
+  }
+
+  return {token, API_URL, register, registerErrMsg, login, loginErrMsg, isLogin, logout, user, getUserInfo, userInfo, updateUserInfo}
 }, { persist: true })
