@@ -20,6 +20,7 @@ import logging  # 추가: 로깅을 위한 임포트
 from rest_framework.views import APIView  # 추가
 from rest_framework.response import Response
 from django.views.decorators.cache import cache_page
+from .recommend import recommend_movies
 
 User = get_user_model()
 
@@ -49,24 +50,6 @@ TMDB_TRENDING_BASE_URL = 'https://api.themoviedb.org/3/trending/movie/day'
 TMDB_API_KEY = '49d792ca8a7053508d689eedb328f369'
 
 
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticatedOrReadOnly])
-# def api_test_TT(request):
-#     Trend.objects.all().delete()
-
-#     params = {
-#         'language': 'ko',
-#         'api_key': TMDB_API_KEY,
-#     }
-#     response = requests.get(TMDB_TRENDING_BASE_URL, params=params).json()
-#     movie_trend = response['results']
-
-#     for movie in movie_trend:
-#         trend_serializer = TrendSerializer(data=movie)
-#         if trend_serializer.is_valid(raise_exception=True):
-#             trend_serializer.save()
-
-#     return JsonResponse({'message': 'Success'})
 
 def api_test_video(request):
     movies = Movie.objects.all()
@@ -75,182 +58,41 @@ def api_test_video(request):
         detail_params = {'language': 'ko-KR', 'api_key': TMDB_API_KEY, 'append_to_response': 'credits,videos'}
         try:
             response = requests.get(f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=detail_params).json()
+            
+            # Debugging: Check the response
+            # print(f"Response for movie ID {movie_id}: ", response)
+
             videos = response['videos']['results']
-            movie.videos = videos[0].get('key') if videos else None
-            movie.runtime = response['runtime']
+            
+            # Debugging: Check the videos list
+            # print(f"Videos for movie ID {movie_id}: ", videos)
+            videos = response.get('videos', {}).get('results')
+            if videos:
+                movie.videos = videos[0].get('key')
+            else:
+                movie.videos = None
+            print(movie)
+        
+            movie.runtime = response.get('runtime', None)
+            
             crew_list = response['credits']['crew']
             director = next((crew['name'] for crew in crew_list if crew['job'] == 'Director'), None)
             movie.director = director  # 속성 접근 방식 사용
-            print(movie)
+            print(f"Director for movie ID {movie_id}: ", director)  # Debug print
+
             movie.save()  # 업데이트된 모델 저장
-        except json.JSONDecodeError:
-            # Log error or take appropriate action
-            pass
-    return JsonResponse({'message': 'Success'})
-                     
 
-#                     runtime = response['runtime']
-#                     video = response['videos']['results'][0].get('key')
-#                     
-
-#                     movie['video'] = video    
-#                                    
-#                     movie_serializer = MovieSerializer(data=movie)
-
-#                     if movie_serializer.is_valid(raise_exception=True):
-#                         movie_id = movie['id']
-#                         if movie['release_date'] == '':
-#                             movie['release_date'] = None
-#                         if movie['video'] == '':
-#                             movie['video'] = None    
-#                         movie_serializer.save(movie_id = movie_id, release_date=movie['release_date'], director=movie['director'], video=movie['video'])
-
-
-
-
-
-
-@permission_classes([IsAuthenticatedOrReadOnly])
-class FetchTMDBPopularMovies(APIView):
-
-    def get(self, request, format=None):
-        async_to_sync(self.fetch_all_movies)()  # async_to_sync를 사용하여 비동기 함수 호출
-        return Response({'message': 'Success'})
-
-    async def fetch_all_movies(self):
-        async with aiohttp.ClientSession() as session:
-            tasks = [self.fetch_movie_page(session, page)
-                     for page in range(1, 501)]
-            await asyncio.gather(*tasks)
-
-    async def fetch_movie_page(self, session, page):
-        params = {
-            'language': 'ko-KR',
-            'api_key': TMDB_API_KEY,
-            'page': page
-        }
-        try:
-            response = await session.get(TMDB_POPULAR_BASE_URL, params=params)
-            data = await response.json()
-            movie_list = data['results']
-            await asyncio.gather(*[self.process_movie(movie) for movie in movie_list])
         except json.JSONDecodeError as e:
-            logging.error(f"JSON decoding error: {e}")
-
-    async def process_movie(self, movie):
-        await sync_to_async(self.save_movie)(movie)
-
-    def save_movie(self, movie):
-        movie_id = movie['id']
-        movie_data = {
-            'like_movie_users_count': 0,
-            'dislike_movie_users_count': 0,
-            'watching_movie_users_count': 0,
-            'favorite_movie_users_count': 0,
-        }
-        # Update movie_data with the actual movie data
-        movie_data.update(movie)
-        movie_serializer = MovieSerializer(data=movie_data)
-        if movie_serializer.is_valid(raise_exception=True):
-            if movie['release_date'] == '':
-                movie['release_date'] = None
-            movie_serializer.save(
-                movie_id=movie_id, release_date=movie['release_date'])
-
-
-@permission_classes([IsAuthenticatedOrReadOnly])
-class UpdateTMDBMovieDetails(APIView):
-
-    def get(self, request, format=None):
-        async_to_sync(self.update_movies_with_additional_details)()
-        return Response({'message': 'Movie details updated successfully'})
-
-    async def update_movies_with_additional_details(self):
-        movies = await sync_to_async(list)(Movie.objects.all())
-        async with aiohttp.ClientSession() as session:
-            await asyncio.gather(*[self.update_movie_detail(session, movie) for movie in movies])
-
-    async def update_movie_detail(self, session, movie):
-        movie_id = movie.movie_id
-        detail_url = f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}'
-        params = {
-            'language': 'ko-KR',
-            'api_key': TMDB_API_KEY,
-            'append_to_response': 'credits,videos',
-        }
-
-        response = await session.get(detail_url, params=params)
-        details = await response.json()
-
-        # Check if the required data is available
-        if 'credits' in details and 'genres' in details and 'videos' in details:
-            await sync_to_async(self.save_movie_details)(movie, details)
-        else:
-            logging.error(
-                f"Required data missing in API response for movie ID {movie_id}")
-
-    def save_movie_details(self, movie, details):
-        movie.runtime = details.get('runtime')
-        director = next((crew['name'] for crew in details['credits']
-                        ['crew'] if crew['job'] == 'Director'), None)
-        movie.director = director
-
-        # Update actors and genres
-        # video = response['videos']['results'][0].get('key')
-        videos_data = details['videos']['results'] if 'videos' in details else [
-        ]
-        actors_data = details['credits']['cast'] if 'credits' in details else [
-        ]
-        genres_data = details['genres'] if 'genres' in details else []
-        actors = [self.update_or_create_actor(actor) for actor in actors_data]
-        genres = [self.update_or_create_genre(genre) for genre in genres_data]
-
-        movie.actors.set(actors)
-        movie.genres.set(genres)
-        # movie.genres.set(videos)
-
-        movie.save()
-
-
-    def update_or_create_actor(self, actor_data):
-        actor, _ = Actor.objects.update_or_create(
-            person_id=actor_data['id'],
-            defaults={
-                'name': actor_data['name'], 'profile_path': actor_data.get('profile_path')}
-        )
-        return actor
-
-    def update_or_create_genre(self, genre_data):
-        genre, _ = Genre.objects.update_or_create(
-            genre_id=genre_data['id'],
-            defaults={'name': genre_data['name']}
-        )
-        return genre
-
-# TMDB Genre 정보
-
-
-@api_view(['GET'])
-def api_test_TG(request):
-    params = {
-        'language': 'ko',
-        'api_key': TMDB_API_KEY,
-    }
-    response = requests.get(TMDB_GENRE_BASE_URL, params=params).json()
-    movie_genres = response['genres']
-
-    for genre in movie_genres:
-        genre_serializer = GenreSerializer(data=genre)
-        if genre_serializer.is_valid(raise_exception=True):
-            genre_id = genre['id']
-            genre_serializer.save(genre_id=genre_id)
+            print(f"JSON Decode Error for movie ID {movie_id}: ", e)
+        except Exception as e:
+            print(f"An error occurred for movie ID {movie_id}: ", e)
     return JsonResponse({'message': 'Success'})
-
 
 # TMDB 영화 트렌드
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def api_test_TT(request):
+    # Trend.objects.all().delete()
     params = {
         'language': 'ko',
         'api_key': TMDB_API_KEY,
@@ -265,6 +107,8 @@ def api_test_TT(request):
             trend_serializer.save(movie_id=movie['id'])
 
     return JsonResponse({'message': 'Success'})
+
+
 
 def api_test_video2(request):
     movies = Trend.objects.all()
@@ -387,18 +231,9 @@ def movies_main(request):
 @permission_classes([IsAuthenticatedOrReadOnly])
 def movie_detail(request, movie_pk):
     movie = movies.get(pk=movie_pk)
-    serializer = MovieDetailSerializer(movie)
+    serializer = MovieSerializer(movie)
+    return Response(serializer.data)
 
-    data = {
-        'isLike': movie.like_movie_users.filter(pk=request.user.pk).exists(),
-        'isFavorite': movie.favorite_movie_users.filter(pk=request.user.pk).exists(),
-        'isDislike': movie.dislike_movie_users.filter(pk=request.user.pk).exists(), 
-        'isWatch': movie.watching_movie_users.filter(pk=request.user.pk).exists()
-    }
-
-    data.update(serializer.data)
-
-    return JsonResponse(data)
 
 # # 영화별 게시글 조회
 @api_view(['GET'])
@@ -422,12 +257,10 @@ def movie_like(request, movie_pk):
     # 해제
     if movie.like_movie_users.filter(pk=user.pk).exists():
         movie.like_movie_users.remove(user)
-        isLike = False
 
     # 등록
     else:
         movie.like_movie_users.add(user)
-        isLike = True
 
     serializer = MovieLikeSerializer(movie)
 
@@ -435,7 +268,6 @@ def movie_like(request, movie_pk):
         'id': serializer.data.get('id'),
         'like_movie_users_count': movie.like_movie_users.count(),
         'like_movie_users': serializer.data.get('like_movie_users'),
-        'isLike': isLike
     }
     return JsonResponse(like_movie_register)
 
@@ -451,12 +283,10 @@ def movie_dislike(request, movie_pk):
     # 해제
     if movie.dislike_movie_users.filter(pk=user.pk).exists():
         movie.dislike_movie_users.remove(user)
-        isDislike = False
 
     # 등록
     else:
         movie.dislike_movie_users.add(user)
-        isDislike = True
 
     serializer = MovieDisLikeSerializer(movie)
 
@@ -464,7 +294,6 @@ def movie_dislike(request, movie_pk):
         'id': serializer.data.get('id'),
         'dislike_movie_users_count': movie.dislike_movie_users.count(),
         'dislike_movie_users': serializer.data.get('dislike_movie_users'),
-        'isDislike': isDislike
     }
     return JsonResponse(dislike_movie_register)
 
@@ -480,11 +309,10 @@ def movie_watching(request, movie_pk):
     # 해제
     if movie.watching_movie_users.filter(pk=user.pk).exists():
         movie.watching_movie_users.remove(user)
-        isWatch = False
+
     # 등록
     else:
         movie.watching_movie_users.add(user)
-        isWatch = True
 
     serializer = MovieWatchingSerializer(movie)
 
@@ -492,7 +320,6 @@ def movie_watching(request, movie_pk):
         'id': serializer.data.get('id'),
         'watching_movie_users_count': movie.watching_movie_users.count(),
         'watching_movie_users': serializer.data.get('watching_movie_users'),
-        'isWatch': isWatch
     }
     return JsonResponse(watching_movie_register)
 
@@ -508,18 +335,17 @@ def movie_favorite(request, movie_pk):
     # 해제
     if movie.favorite_movie_users.filter(pk=user.pk).exists():
         movie.favorite_movie_users.remove(user)
-        isFavorite = False
+
     # 등록
     else:
         movie.favorite_movie_users.add(user)
-        isFavorite = True
+
     serializer = MovieFavoriteSerializer(movie)
 
     favorite_movie_register = {
         'id': serializer.data.get('id'),
         'favorite_movie_users_count': movie.favorite_movie_users.count(),
         'favorite_movie_users': serializer.data.get('favorite_movie_users'),
-        'isFavorite': isFavorite
     }
     return JsonResponse(favorite_movie_register)
 
@@ -547,7 +373,7 @@ def movie_genre(request, genre_id):
 
 
 # 필터링된 영화 정보
-# @cache_page(60 * 30)  # Cache for 15 minutes
+@cache_page(60 * 30)  # Cache for 15 minutes
 @api_view(['GET'])
 # 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @permission_classes([IsAuthenticatedOrReadOnly])
@@ -575,14 +401,7 @@ def movie_sort(request, sort_num):
 
     return Response(MovieSerializer(sort_movies, many=True).data)
 
-# # (추천)역대급 영화
-# def best_movie(request):
-#     pass
 
-
-# # (추천)날씨별 추천 영화
-# def for_weather(request):
-#     pass
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
@@ -590,3 +409,10 @@ def person_detail(request, actor_id):
     person = Actor.objects.get(id=actor_id)
     serializer = ActorSerializer(person)
     return Response(serializer.data)
+
+
+# @api_view(['GET'])
+def movie_recommendation(request, title):
+    recommended_movies = recommend_movies(title)
+    serializer = MovieRecommendSerializer(recommended_movies, many=True)
+    return JsonResponse({'recommended_movies': serializer.data})
