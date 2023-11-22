@@ -44,7 +44,7 @@
       <input class="input" type="text" id="title" placeholder="제목을 입력하세요" v-model.trim="title">
       <textarea class="textarea" id="content" rows="10" placeholder="내용을 입력하세요" v-model.trim="content"></textarea>
       <div class="buttons">
-        <button class="btn btn-secondary" @click="goBack">뒤로 가기</button>
+        <button class="btn btn-secondary" @click.prevent="goBack">뒤로 가기</button>
         <button class="btn btn-signature" type="submit">작성하기</button>
       </div>
     </form>

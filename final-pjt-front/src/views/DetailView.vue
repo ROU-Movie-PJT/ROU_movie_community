@@ -25,5 +25,6 @@
     flex-direction: column;
     gap: 3rem;
     width: 90%;
+    padding-bottom: 2rem;
   }
 </style>

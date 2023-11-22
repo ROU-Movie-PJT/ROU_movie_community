@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
   import { useMovieStore } from '../../stores/movies'
   import MovieReview from './MovieReview.vue'
 
@@ -10,14 +10,23 @@
   const onToggle = function () {
     isAllList.value = !isAllList.value
   }
+
+  const isReviewValid = computed(() => {
+    return store.movieReview.length
+  })
 </script>
 
 <template>
   <div class="content">
     <h3 class="title">사용자 리뷰</h3>
-    <p v-if="isAllList" class="sm-font blue" @click="onToggle">닫기</p>
-    <p v-else class="sm-font white" @click="onToggle">전체 목록</p>
-    <MovieReview v-for="review in isAllList ? store.movieReview : store.movieReview.slice(0, 3)" :review="review" />
+    <div v-if="isReviewValid" class="review-list">
+      <p v-if="isAllList" class="sm-font blue" @click="onToggle">닫기</p>
+      <p v-else class="sm-font white" @click="onToggle">전체 목록</p>
+      <MovieReview v-for="review in isAllList ? store.movieReview : store.movieReview.slice(0, 3)" :review="review" />
+    </div>
+    <div v-else class="review-list">
+      <p class="none-review">아직 리뷰가 존재하지 않습니다.</p>
+    </div>
   </div>
 </template>
 
@@ -25,7 +34,7 @@
   .content {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: .5rem;
   }
   .title {
     font-weight: bold;
@@ -36,11 +45,26 @@
     font-size: small;
     text-align: end;
     cursor: pointer;
+    margin: 0;
   }
   .blue {
     color: dodgerblue;
   }
   .white {
     color: white;
+  }
+
+  .review-list {
+    border: 1px solid gainsboro;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 1rem;
+  }
+
+  .none-review {
+    color: grey;
+    margin: 0;
   }
 </style>
