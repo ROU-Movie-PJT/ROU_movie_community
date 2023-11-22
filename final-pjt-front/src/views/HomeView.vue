@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, watch, onMounted, onUpdated } from 'vue'
+  import { ref, watch, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { useMovieStore } from '../stores/movies'
   import MovieCarousel from '../components/home/MovieCarousel.vue'
@@ -10,6 +10,11 @@
 
   const store = useMovieStore()
   const router = useRouter()
+
+  onMounted(() => {
+    store.getRecommendMovies()
+    //store.getTrendMovies()
+  })
 
   const favoriteGenres = ref({
     1: '액션',

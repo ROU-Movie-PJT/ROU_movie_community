@@ -6,6 +6,9 @@ import LoginView from '../views/LoginView.vue'
 import CreateView from '../views/CreateView.vue'
 
 const router = createRouter({
+  scrollBehavior(to, from) {
+    return {top: 0}
+  },
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {

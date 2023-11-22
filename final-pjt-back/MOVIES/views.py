@@ -457,7 +457,7 @@ def movie_trend(request):
 def movie_genre(request, genre_id):
     genre_movie = movies.filter(
         genres=genre_id,
-        release_date__lte=date.today()).order_by('?')[:10]
+        release_date__lte=date.today()).order_by('-popularity')[:10]
     serializer = MovieSerializer(genre_movie, many=True)
     return Response(serializer.data)
 
