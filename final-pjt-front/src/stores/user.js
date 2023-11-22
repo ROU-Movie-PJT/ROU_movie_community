@@ -58,6 +58,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = res.data.key
         console.log('로그인 성공')
         router.push({name: 'home'})
+        username.value = username
       })
       .catch(err => {
         loginErrMsg.value = {}
