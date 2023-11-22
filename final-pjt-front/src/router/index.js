@@ -4,6 +4,7 @@ import DetailView from '../views/DetailView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
 import CreateView from '../views/CreateView.vue'
+import UpdateUserInfoView from '../views/UpdateUserInfoView.vue'
 
 const router = createRouter({
   scrollBehavior(to, from) {
@@ -35,6 +36,11 @@ const router = createRouter({
       path: '/community/create/:movieId',
       name: 'create',
       component: CreateView
+    },
+    {
+      path: '/accounts/update',
+      name: 'update_account',
+      component: UpdateUserInfoView
     }
   ]
 })

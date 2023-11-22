@@ -62,9 +62,6 @@ export const useMovieStore = defineStore('movie', () => {
     })
       .then(res => {
         trendMovies.value = res.data
-        for (const movie in trendMovies.value) {
-          console.log(trendMovies.value[movie].title)
-        }
       })
   }
 

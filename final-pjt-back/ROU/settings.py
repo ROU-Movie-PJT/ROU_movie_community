@@ -169,7 +169,8 @@ AUTH_USER_MODEL = 'ACCOUNTS.User'
 
 REST_AUTH = {
     'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer',
-    'USER_DETAILS_SERIALIZER': 'ACCOUNTS.serializers.ProfileSerializer'
+    'USER_DETAILS_SERIALIZER': 'ACCOUNTS.serializers.ProfileSerializer',
+    'TOKEN_SERIALIZER': 'ACCOUNTS.serializers.CustomTokenSerializer',
 }
 
 # REST_AUTH_REGISTER_SERIALIZERS = {

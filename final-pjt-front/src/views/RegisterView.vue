@@ -31,7 +31,7 @@
   <div class="content-box">
     <div class="register-box">
       <h2><b>회원가입</b></h2>
-      <form class="register-form">
+      <form class="register-form" @submit.prevent="register">
         <div class="register-item">
           <label for="username">아이디</label>
           <span class="sm-font" v-if="store.registerErrMsg.username">* {{ store.registerErrMsg.username }}</span>
@@ -64,7 +64,7 @@
         </div>
         <hr>
         <span class="sm-font" v-if="store.registerErrMsg.non_field_errors">* {{ store.registerErrMsg.non_field_errors }}</span>
-        <button type="submit" @click.prevent="register" class="register-btn">가입</button>
+        <button type="submit" class="register-btn">가입</button>
       </form>
     </div>
   </div>

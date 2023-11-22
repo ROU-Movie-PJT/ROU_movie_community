@@ -442,7 +442,6 @@ def movie_like(request, movie_pk):
 # 영화 싫어요 등록 및 해제(싫어요 수까지 출력)
 # 인증된 사용자만 권한 허용
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def movie_dislike(request, movie_pk):

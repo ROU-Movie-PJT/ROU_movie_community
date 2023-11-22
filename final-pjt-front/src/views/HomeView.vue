@@ -13,7 +13,7 @@
 
   onMounted(() => {
     store.getRecommendMovies()
-    //store.getTrendMovies()
+    store.getTrendMovies()
   })
 
   const favoriteGenres = ref({
