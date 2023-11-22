@@ -18,17 +18,22 @@ class Genre(models.Model):
 
 # TMDB Trend 목록
 class Trend(models.Model):
+    movie_id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=100)
     poster_path = models.CharField(max_length=60, blank=True, null=True)
-    # genres = models.ManyToManyField(Genre, blank=True)
-    # release_date = models.DateField(blank=True, null=True)
-    # vote_average = models.FloatField()
-    # vote_count = models.IntegerField()
+
+    videos = models.TextField(null=True, blank=True)
+    def create(self, validated_data):
+        movie_id = validated_data.pop('movie_id', None)  # movie_id를 추출
+        instance = Trend.objects.create(**validated_data, movie_id=movie_id)
+        return instance
+
+
 
 
 # TMDB popular 영화 목록
 class Movie(models.Model):
-    movie_id = models.IntegerField()
+    movie_id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=100)
     adult = models.BooleanField()
     backdrop_path = models.CharField(max_length=60, blank=True, null=True)
@@ -43,6 +48,7 @@ class Movie(models.Model):
     runtime = models.IntegerField(null=True, blank=True)
     actors = models.ManyToManyField(Actor, blank=True)
     director = models.CharField(max_length=50, null=True, blank=True)
+    videos = models.TextField(null=True, blank=True)
 
     like_movie_users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name='like_movies', blank=True)  # 영화를 좋아요한 사용자

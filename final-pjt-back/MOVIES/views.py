@@ -49,7 +49,66 @@ TMDB_TRENDING_BASE_URL = 'https://api.themoviedb.org/3/trending/movie/day'
 TMDB_API_KEY = '49d792ca8a7053508d689eedb328f369'
 
 
-# Create your views here.
+# @api_view(['GET'])
+# @permission_classes([IsAuthenticatedOrReadOnly])
+# def api_test_TT(request):
+#     Trend.objects.all().delete()
+
+#     params = {
+#         'language': 'ko',
+#         'api_key': TMDB_API_KEY,
+#     }
+#     response = requests.get(TMDB_TRENDING_BASE_URL, params=params).json()
+#     movie_trend = response['results']
+
+#     for movie in movie_trend:
+#         trend_serializer = TrendSerializer(data=movie)
+#         if trend_serializer.is_valid(raise_exception=True):
+#             trend_serializer.save()
+
+#     return JsonResponse({'message': 'Success'})
+
+def api_test_video(request):
+    movies = Movie.objects.all()
+    for movie in movies:
+        movie_id = movie.movie_id
+        detail_params = {'language': 'ko-KR', 'api_key': TMDB_API_KEY, 'append_to_response': 'credits,videos'}
+        try:
+            response = requests.get(f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=detail_params).json()
+            videos = response['videos']['results']
+            movie.videos = videos[0].get('key') if videos else None
+            movie.runtime = response['runtime']
+            crew_list = response['credits']['crew']
+            director = next((crew['name'] for crew in crew_list if crew['job'] == 'Director'), None)
+            movie.director = director  # 속성 접근 방식 사용
+            print(movie)
+            movie.save()  # 업데이트된 모델 저장
+        except json.JSONDecodeError:
+            # Log error or take appropriate action
+            pass
+    return JsonResponse({'message': 'Success'})
+                     
+
+#                     runtime = response['runtime']
+#                     video = response['videos']['results'][0].get('key')
+#                     
+
+#                     movie['video'] = video    
+#                                    
+#                     movie_serializer = MovieSerializer(data=movie)
+
+#                     if movie_serializer.is_valid(raise_exception=True):
+#                         movie_id = movie['id']
+#                         if movie['release_date'] == '':
+#                             movie['release_date'] = None
+#                         if movie['video'] == '':
+#                             movie['video'] = None    
+#                         movie_serializer.save(movie_id = movie_id, release_date=movie['release_date'], director=movie['director'], video=movie['video'])
+
+
+
+
+
 
 @permission_classes([IsAuthenticatedOrReadOnly])
 class FetchTMDBPopularMovies(APIView):
@@ -117,14 +176,14 @@ class UpdateTMDBMovieDetails(APIView):
         params = {
             'language': 'ko-KR',
             'api_key': TMDB_API_KEY,
-            'append_to_response': 'credits',
+            'append_to_response': 'credits,videos',
         }
 
         response = await session.get(detail_url, params=params)
         details = await response.json()
 
         # Check if the required data is available
-        if 'credits' in details and 'genres' in details:
+        if 'credits' in details and 'genres' in details and 'videos' in details:
             await sync_to_async(self.save_movie_details)(movie, details)
         else:
             logging.error(
@@ -137,6 +196,9 @@ class UpdateTMDBMovieDetails(APIView):
         movie.director = director
 
         # Update actors and genres
+        # video = response['videos']['results'][0].get('key')
+        videos_data = details['videos']['results'] if 'videos' in details else [
+        ]
         actors_data = details['credits']['cast'] if 'credits' in details else [
         ]
         genres_data = details['genres'] if 'genres' in details else []
@@ -145,8 +207,10 @@ class UpdateTMDBMovieDetails(APIView):
 
         movie.actors.set(actors)
         movie.genres.set(genres)
+        # movie.genres.set(videos)
 
         movie.save()
+
 
     def update_or_create_actor(self, actor_data):
         actor, _ = Actor.objects.update_or_create(
@@ -187,21 +251,42 @@ def api_test_TG(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def api_test_TT(request):
-    Trend.objects.all().delete()
-
     params = {
         'language': 'ko',
         'api_key': TMDB_API_KEY,
     }
     response = requests.get(TMDB_TRENDING_BASE_URL, params=params).json()
-    movie_trend = response['results']
+    movies_trend = response['results']
+    
 
-    for movie in movie_trend:
+    for movie in movies_trend:
         trend_serializer = TrendSerializer(data=movie)
         if trend_serializer.is_valid(raise_exception=True):
-            trend_serializer.save()
+            trend_serializer.save(movie_id=movie['id'])
+
     return JsonResponse({'message': 'Success'})
 
+def api_test_video2(request):
+    movies = Trend.objects.all()
+    for movie in movies:
+        movie_id = movie.movie_id
+        detail_params = {'language': 'ko-KR', 'api_key': TMDB_API_KEY, 'append_to_response': 'videos'}
+        try:
+            response = requests.get(f'{TMDB_DETAIL_INFO_BASE_URL}{movie_id}', params=detail_params).json()
+            videos = response.get('videos', {}).get('results')
+            if videos:
+                movie.videos = videos[0].get('key')
+            else:
+                movie.videos = None
+            print(movie)
+            movie.save()  # 업데이트된 모델 저장
+        except json.JSONDecodeError:
+            # Log error or take appropriate action
+            pass
+        except KeyError:
+            # Log error or take appropriate action
+            pass
+    return JsonResponse({'message': 'Success'})
 
 # # TMDB popular 영화 목록
 # @api_view(['GET'])
@@ -502,7 +587,7 @@ def movie_sort(request, sort_num):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedOrReadOnly])
-def actor_detail(request, actor_pk):
-    actor = Actor.objects.get(pk=actor_pk)
-    serializer = ActorSerializer(actor)
+def person_detail(request, actor_id):
+    person = Actor.objects.get(id=actor_id)
+    serializer = ActorSerializer(person)
     return Response(serializer.data)
