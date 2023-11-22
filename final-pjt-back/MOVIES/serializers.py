@@ -167,3 +167,11 @@ class MovieFavoriteSerializer(serializers.ModelSerializer):
         model = Movie
         # 영화 id, 찜한 사용자 목록, 찜한 수
         fields = ('id', 'favorite_movie_users', )
+
+class MovieRecommendSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Movie
+        fields = '__all__'
+        read_only_fields = ('movie_id', 'release_date', 'genres', 'actors', 'like_movie_users_count',
+                            'dislike_movie_users_count', 'watching_movie_users_count', 'favorite_movie_users_count', 'review_movie_count',)
