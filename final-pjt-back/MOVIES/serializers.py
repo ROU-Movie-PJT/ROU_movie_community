@@ -97,11 +97,17 @@ class MovieSerializer(serializers.ModelSerializer):
         read_only_fields = ('movie_id', 'release_date', 'like_movie_users_count',
                             'dislike_movie_users_count', 'watching_movie_users_count', 'favorite_movie_users_count', 'review_movie_count')
 
-
 # 영화별 게시글 조회
 class MovieReviewSerializer(serializers.ModelSerializer):
 
     class ReviewSerializer(serializers.ModelSerializer):
+        class UserSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = User
+                fields = ('id', 'username', 'profile_image')
+
+        write_review_user = UserSerializer()
+
         class Meta:
             model = Review
             fields = '__all__'
@@ -113,15 +119,13 @@ class MovieReviewSerializer(serializers.ModelSerializer):
         # 영화 id, 영화에 작성된 게시글
         fields = ('id', 'write_movie_review')
 
-
-# 영화 좋아요 등록 및 해제
-class MovieLikeSerializer(serializers.ModelSerializer):
-
-    class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
         class Meta:
             model = User
             fields = ('id', 'username',)
 
+# 영화 좋아요 등록 및 해제
+class MovieLikeSerializer(serializers.ModelSerializer):
     # 좋아요한 사용자
     like_movie_users = UserSerializer(many=True, read_only=True)
 
@@ -133,12 +137,6 @@ class MovieLikeSerializer(serializers.ModelSerializer):
 
 # 영화 싫어요 등록 및 해제
 class MovieDisLikeSerializer(serializers.ModelSerializer):
-
-    class UserSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = User
-            fields = ('id', 'username',)
-
     # 싫어요한 사용자
     dislike_movie_users = UserSerializer(many=True, read_only=True)
 
@@ -150,12 +148,6 @@ class MovieDisLikeSerializer(serializers.ModelSerializer):
 
 # 영화 시청 등록 및 해제
 class MovieWatchingSerializer(serializers.ModelSerializer):
-
-    class UserSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = User
-            fields = ('id', 'username',)
-
     # 영화 시청 사용자
     watching_movie_users = UserSerializer(many=True, read_only=True)
 
@@ -167,12 +159,6 @@ class MovieWatchingSerializer(serializers.ModelSerializer):
 
 # 영화 찜 등록 및 해제
 class MovieFavoriteSerializer(serializers.ModelSerializer):
-
-    class UserSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = User
-            fields = ('id', 'username',)
-
     # 찜한 사용자
     favorite_movie_users = UserSerializer(many=True, read_only=True)
 
