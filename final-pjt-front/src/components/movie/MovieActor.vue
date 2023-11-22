@@ -10,7 +10,8 @@
 
 <template>
   <div class="actor-content">
-    <img class="profile-img" :src="image(actor.profile_path)" alt="">
+    <img v-if="actor.profile_path" class="profile-img" :src="image(actor.profile_path)" alt="">
+    <img v-else class="profile-img" src="../../assets/profile.png" alt="">
     <p class="name">{{ actor.name }}</p>
   </div>
 </template>
@@ -26,6 +27,7 @@
   .profile-img {
     height: 100%;
     border-radius: 50%;
+    background-color: gainsboro;
   }
   .name {
     margin: 0;
