@@ -47,7 +47,7 @@
 
 <template>
   <div class="container">
-    <!-- <MovieCarousel /> -->
+    <MovieCarousel class="trend-movies" />
     <div class="badges">
       <Badge 
         :class="{'text-bg-primary': activeBadge === 20, 'text-bg-secondary': activeBadge !== 20}" 
@@ -70,7 +70,7 @@
         <span class="sort-title">{{ title }}</span>
         <Carousel :items-to-show="7" :wrap-around="true">
           <template v-for="item in store.recommendMovies[key]" :key="item">
-            <Slide v-if="item.poster_path" @click="goDetail(item.id)">
+            <Slide v-if="item.poster_path" @click="goDetail(item.movie_id)">
               <MovieCard class="carousel__item" :item=item />
             </Slide>
           </template>
@@ -84,7 +84,7 @@
         <span class="sort-title">{{ store.choice[key] }}</span>
         <Carousel :items-to-show="7" :wrap-around="true">
           <template v-for="item in store.recommendMovies[key]" :key="item">
-            <Slide v-if="item.poster_path" @click="goDetail(item.id)">
+            <Slide v-if="item.poster_path" @click="goDetail(item.movie_id)">
               <MovieCard class="carousel__item" :item=item />
             </Slide>
           </template>
@@ -134,5 +134,9 @@
     margin-top: -56px;  /* 헤더의 height와 동일한 값 */
     visibility: hidden;
     z-index: 0;
-}
+  }
+
+  .trend-movies {
+    width: 100%;
+  }
 </style>

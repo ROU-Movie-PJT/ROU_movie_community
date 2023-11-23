@@ -15,7 +15,6 @@
   onMounted(() => {
     store.getMovieDetail(movieId.value)
     store.getMovieReview(movieId.value)
-    store.getGenreRecommendMovies(store.movieDetail.genres)
   })
 
   onBeforeRouteUpdate((to, from) => {

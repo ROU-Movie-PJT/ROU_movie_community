@@ -40,11 +40,11 @@ INSTALLED_APPS = [
     # 'MESSENGER',
 
     # 3rd party apps
-    'haystack',
     'rest_framework',
     'rest_framework.authtoken',
     'dj_rest_auth',
     'corsheaders',
+    'haystack',
     'django.contrib.sites',
     'allauth',
     'allauth.account',

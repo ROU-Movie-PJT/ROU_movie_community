@@ -75,7 +75,7 @@
         </div>
         <button v-if="userStore.token" class="btn" @click="createReview">리뷰 쓰기</button>
       </div>
-      <!-- <MovieTrailer :movie="store.movieDetail" /> -->
+      <MovieTrailer :movie="store.movieDetail" />
     </div>
     <img class="poster" :src=image(store.movieDetail.poster_path) alt="">
   </div>

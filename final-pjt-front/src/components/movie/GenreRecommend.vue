@@ -1,4 +1,5 @@
 <script setup>
+  import { onMounted, ref } from 'vue'
   import { useMovieStore } from '../../stores/movies'
   import { useRouter } from 'vue-router'
   import MovieCard from '../home/MovieCard.vue'
@@ -6,6 +7,10 @@
 
   const store = useMovieStore()
   const router = useRouter()
+
+  onMounted(() => {
+    store.getGenreRecommendMovies(store.movieDetail.genres)
+  })
 
   const goDetail = function (movieId) {
     router.push({name: 'movie_detail', params: {id: movieId}})
@@ -16,7 +21,7 @@
   <div class="recommend-list">
     <h3 class="title">"{{ store.movieDetail.title }}" 와(과) 비슷한 영화</h3>
     <div class="card-list">
-      <MovieCard @click="goDetail(movie.id)" class="movie-card" v-for="movie in _.shuffle(store.genreRecommendMovies.slice(0, 21))" :item="movie"/>
+      <MovieCard @click="goDetail(movie.movie_id)" class="movie-card" v-for="movie in _.shuffle(store.genreRecommendMovies.slice(0, 21))" :item="movie"/>
     </div>
   </div>
 </template>

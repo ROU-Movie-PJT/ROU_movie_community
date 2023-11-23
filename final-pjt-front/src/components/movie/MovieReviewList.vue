@@ -1,9 +1,15 @@
 <script setup>
-  import { ref, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
+  import { useRoute } from 'vue-router'
   import { useMovieStore } from '../../stores/movies'
   import MovieReview from './MovieReview.vue'
 
   const store = useMovieStore()
+  const route = useRoute()
+
+  onMounted(() => {
+    store.getMovieReview(route.params.id)
+  })
 
   const isAllList = ref(false)
 

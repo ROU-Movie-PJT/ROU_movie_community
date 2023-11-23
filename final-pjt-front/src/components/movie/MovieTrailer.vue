@@ -1,37 +1,16 @@
 <script setup>
   import { ref, computed } from 'vue'
-  import axios from 'axios'
 
   const props = defineProps({
     movie: Object
   })
 
-  const trailer = ref(null)
-
-  axios({
-    method: 'get',
-    url: 'https://www.googleapis.com/youtube/v3/search',
-    params: {
-      key: import.meta.env.VITE_YOUTUBE_API_KEY,
-      part: 'snippet',
-      type: 'video',
-      q: `${props.movie.title} 공식 예고편`
-    }
-  })
-    .then(res => {
-      trailer.value = res.data.items[0]
-      // console.log(trailer.value.id.videoId)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-
   const isNotEmpty = computed(() => {
-    return trailer.value !== null
+    return props.movie.videos !== null
   })
 
   const getVideoUrl = function() {
-    return `https://www.youtube.com/embed/${trailer.value.id.videoId}`
+    return `https://www.youtube.com/embed/${props.movie.videos}`
   }
 </script>
 

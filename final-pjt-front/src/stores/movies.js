@@ -160,7 +160,7 @@ export const useMovieStore = defineStore('movie', () => {
     for (const key in genres) {
       axios({
         method: 'get',
-        url: `${API_URL}/movies/${genres[key].id}/genre/`
+        url: `${API_URL}/movies/${genres[key].genre_id}/genre/`
       })
         .then(res => {
           genreRecommendMovies.value = genreRecommendMovies.value.concat(res.data)

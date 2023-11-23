@@ -20,19 +20,11 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('genre_id',)
 
-
 class TrendSerializer(serializers.ModelSerializer):
     class GenreSerializer(serializers.ModelSerializer):
 
         class Meta:
             model = Genre
-            # 단일 컬럼 출력 시 ,(콤마) 필수(없으면 인식 못함)
-            fields = '__all__'
-
-    class ActorSerializer(serializers.ModelSerializer):
-
-        class Meta:
-            model = Actor
             # 단일 컬럼 출력 시 ,(콤마) 필수(없으면 인식 못함)
             fields = '__all__'
 
@@ -53,6 +45,17 @@ class TrendSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('movie_id', 'release_date',)
 
+class MovieDetailSerializer(serializers.ModelSerializer):
+    actors = ActorSerializer(many=True)
+    genres = GenreSerializer(many=True)
+    like_movie_users_count = serializers.IntegerField(source='like_movie_users.count', read_only=True)
+    dislike_movie_users_count = serializers.IntegerField(source='dislike_movie_users.count', read_only=True)
+    favorite_movie_users_count = serializers.IntegerField(source='favorite_movie_users.count', read_only=True)
+
+    class Meta:
+        model = Movie
+        fields = '__all__'
+
 
 class MovieSerializer(serializers.ModelSerializer):
 
@@ -60,13 +63,6 @@ class MovieSerializer(serializers.ModelSerializer):
 
         class Meta:
             model = Genre
-            # 단일 컬럼 출력 시 ,(콤마) 필수(없으면 인식 못함)
-            fields = '__all__'
-
-    class ActorSerializer(serializers.ModelSerializer):
-
-        class Meta:
-            model = Actor
             # 단일 컬럼 출력 시 ,(콤마) 필수(없으면 인식 못함)
             fields = '__all__'
 
@@ -124,7 +120,7 @@ class MovieReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         # 영화 id, 영화에 작성된 게시글
-        fields = ('id', 'write_movie_review')
+        fields = ('movie_id', 'write_movie_review')
 
 class UserSerializer(serializers.ModelSerializer):
         class Meta:
@@ -139,7 +135,7 @@ class MovieLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         # 영화 id, 좋아요를 한 사용자 목록, 좋아요 수
-        fields = ('id', 'like_movie_users', )
+        fields = ('movie_id', 'like_movie_users', )
 
 
 # 영화 싫어요 등록 및 해제
@@ -150,7 +146,7 @@ class MovieDisLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         # 영화 id, 싫어요를 한 사용자 목록, 싫어요 수
-        fields = ('id', 'dislike_movie_users', )
+        fields = ('movie_id', 'dislike_movie_users', )
 
 
 # 영화 시청 등록 및 해제
@@ -161,7 +157,7 @@ class MovieWatchingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         # 영화 id, 시청한 사용자 목록, 시청한 사용자 수
-        fields = ('id', 'watching_movie_users', )
+        fields = ('movie_id', 'watching_movie_users', )
 
 
 # 영화 찜 등록 및 해제
@@ -172,7 +168,7 @@ class MovieFavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         # 영화 id, 찜한 사용자 목록, 찜한 수
-        fields = ('id', 'favorite_movie_users', )
+        fields = ('movie_id', 'favorite_movie_users', )
 
 class MovieRecommendSerializer(serializers.ModelSerializer):
 
