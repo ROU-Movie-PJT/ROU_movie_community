@@ -2,13 +2,22 @@
   defineProps({
     review: Object
   })
+
+  const image = function(path) {
+    return `http://localhost:8000${path}`
+  }
 </script>
 
 <template>
   <div class="review-content">
     <div class="left-box">
-      <p class="title">{{ review.title }}</p>
-      <p class="content">{{ review.content }}</p>
+      <div class="circle">
+        <img class="writer-img" :src="image(review.write_review_user.profile_image)" alt="">
+      </div>
+      <div class="text-box">
+        <p class="title">{{ review.title }}</p>
+        <p class="content">{{ review.content }}</p>
+      </div>
     </div>
     <div class="right-box">
       <div class="icon-list">
@@ -39,7 +48,21 @@
   }
 
   .left-box {
+    display: flex;
+    gap: 1rem;
     flex-grow: 1;
+  }
+
+  .circle {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .writer-img {
+    height: 100%;
+    width: 100%;
   }
 
   .right-box {

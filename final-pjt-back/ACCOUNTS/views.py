@@ -47,20 +47,16 @@ def preference(request, pType):
   elif request.method == 'PUT':
     genres = request.data['genres'].split(',')
     if pType == 'like':
+      user.like_genres.clear()
       for genre_name in genres:
         genre = get_object_or_404(Genre, name=genre_name)
-        if user.like_genres.filter(id=genre.id).exists():
-          user.like_genres.remove(genre)
-        else:
-          user.like_genres.add(genre)
+        user.like_genres.add(genre)
       serializer = LikeGenreSerializer(user)
     elif pType == 'hate':
+      user.hate_genres.clear()
       for genre_name in genres:
         genre = get_object_or_404(Genre, name=genre_name)
-        if user.hate_genres.filter(id=genre.id).exists():
-          user.hate_genres.remove(genre)
-        else:
-          user.hate_genres.add(genre)
+        user.hate_genres.add(genre)
       serializer = HateGenreSerializer(user)
     return Response(serializer.data)
 

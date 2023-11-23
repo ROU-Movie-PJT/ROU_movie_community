@@ -1,34 +1,27 @@
 <script setup>
   import { ref, onMounted } from 'vue'
-  import { useUserStore } from '../stores/user';
+  import { useUserStore } from '../stores/user'
 
   const userStore = useUserStore()
 
-  const profileImage = ref(userStore.userInfo.profile_image)
   const region = ref(userStore.userInfo.region)
   const birth = ref(userStore.userInfo.birth)
   const profileImageRef = ref()
   const imagePath = ref(userStore.userInfo.profile_image)
   const profilePath = ref(`http://localhost:8000${imagePath.value}`)
-
-  onMounted(() => {
-    userStore.getUserInfo()
-  })
   
+
   const changeProfileImage = function () {
     profilePath.value = window.URL.createObjectURL(profileImageRef.value.files[0])
-    const formData = new FormData()
-    formData.append('files', profileImageRef.value.files[0])
-    profileImage.value = formData
   }
 
   const updateInfo = function () {
-    const payload = {
-      profileImage: profileImage.value,
-      region: region.value,
-      birth: birth.value
-    }
-    userStore.updateUserInfo(payload)
+    const formData = new FormData()
+    formData.append('profile_image', profileImageRef.value.files[0])
+    formData.append('region', region.value)
+    formData.append('birth', birth.value)
+    console.log(formData)
+    userStore.updateUserInfo(formData)
   }
 </script>
 
@@ -36,11 +29,11 @@
   <div class="content-box">
     <div class="update-box">
       <h2><b>회원 정보 수정</b></h2>
-      <form class="update-form" @submit.prevent="updateInfo">
+      <form v-if="userStore.userInfo" class="update-form" @submit.prevent="updateInfo">
         <div class="update-item">
           <label for="username">프로필 이미지</label>
           <div class="image-box">
-            <img class="profile-image" v-if="userStore.userInfo.profile_image !== ''" :src="profilePath" alt="">
+            <img class="profile-image" v-if="userStore.userInfo.profile_image !== ''" :src="profilePath" accept="image/*" alt="">
           </div>
           <input class="input" type="file" ref="profileImageRef" accept="image/*" @change="changeProfileImage">
         </div>
@@ -115,6 +108,7 @@
     width: 80px;
     height: 80px;
     align-self: center;
+    background-color: white;
   }
 
   .profile-image {
