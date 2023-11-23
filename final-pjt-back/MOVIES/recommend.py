@@ -25,7 +25,7 @@ def recommend_movies(title):
 
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    sim_scores = sim_scores[1:11]  # 가장 유사한 10개의 영화 선택
+    sim_scores = sim_scores[1:22]  # 가장 유사한 10개의 영화 선택
 
     movie_indices = [i[0] for i in sim_scores]
     
