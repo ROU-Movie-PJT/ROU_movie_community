@@ -486,8 +486,8 @@ def person_detail(request, actor_id):
     return Response(serializer.data)
 
 
-# @api_view(['GET'])
+@api_view(['GET'])
 def movie_recommendation(request, title):
-    recommended_movies = recommend_movies(title)
+    recommended_movies = recommend_movies(request.user.id, title)  # user_id 대신 request.user를 전달합니다.
     serializer = MovieRecommendSerializer(recommended_movies, many=True)
-    return JsonResponse({'recommended_movies': serializer.data})
+    return Response({'recommended_movies': serializer.data})

@@ -10,6 +10,7 @@ from .serializers import *
 from MOVIES.models import Genre
 from django.http import JsonResponse
 
+
 User = get_user_model()
 
 @api_view(['POST'])
@@ -100,3 +101,5 @@ def user_friend(request, user_pk):
             'content': f'추천 친구가 없습니다.',
         }
         return Response(data, status=status.HTTP_204_NO_CONTENT)
+
+
