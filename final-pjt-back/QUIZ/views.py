@@ -148,23 +148,23 @@ def _quiz_item_delete(request, quiz):
     item.delete()
     return Response({'delete': 'Quiz item deleted'}, status=status.HTTP_204_NO_CONTENT)
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def submit_quiz(request, quiz_pk):
-    """퀴즈 제출 처리."""
+    """Processing quiz submissions."""
     quiz = get_object_or_404(Quiz, pk=quiz_pk)
 
-    # 이미 시도한 퀴즈인지 확인
+    # Check if the quiz has already been attempted
     if UserQuizAttempt.objects.filter(user=request.user, quiz=quiz).exists():
-        return Response({'message': '이미 시도한 퀴즈입니다.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'This quiz has already been attempted.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    user_answer = request.data.get('user_answer')
+    user_answer_id = request.data.get('user_answer')
 
     try:
-        is_correct = check_if_correct(quiz, user_answer)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        user_answer_item = QuizItem.objects.get(quiz=quiz, pk=user_answer_id)
+        is_correct = user_answer_item.is_correct
+    except QuizItem.DoesNotExist:
+        return Response({'error': 'Invalid answer ID'}, status=status.HTTP_400_BAD_REQUEST)
 
     UserQuizAttempt.objects.create(
         user=request.user,
@@ -174,6 +174,13 @@ def submit_quiz(request, quiz_pk):
 
     return Response({'is_correct': is_correct})
 
+def check_if_correct(quiz, user_answer_id):
+    """Check if the user's answer is correct for the given quiz."""
+    try:
+        user_answer_item = QuizItem.objects.get(quiz=quiz, pk=user_answer_id)
+        return user_answer_item.is_correct
+    except QuizItem.DoesNotExist:
+        raise ValueError("Invalid answer ID")
 
 # @api_view(['GET'])
 # @permission_classes([IsAuthenticatedOrReadOnly])
@@ -223,3 +230,25 @@ def user_correct_quiz_count(request):
 
     serializer = ProfileSerializer(user)
     return Response(serializer.data)
+
+@api_view(['GET', 'POST'])
+# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
+@permission_classes([IsAuthenticatedOrReadOnly])
+def quiz_item_list_or_create(request, quiz_pk):
+    quiz = get_object_or_404(Quiz, pk=quiz_pk)
+
+    def quiz_item_list():
+        serializer = QuizSerializer(quiz)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def quiz_item_create():
+        serializer = QuizItemSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            serializer = QuizSerializer(quiz)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    if request.method == 'GET':
+        return quiz_item_list()
+    elif request.method == 'POST':
+        return quiz_item_create()    

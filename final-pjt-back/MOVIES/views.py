@@ -402,7 +402,7 @@ def movie_watching(request, movie_pk):
 # 인증된 사용자만 권한 허용
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def movie_favorite(request, movie_pk):
+def movie_favorite(request, movie_pk, quiz_item_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     user = request.user
 
@@ -486,8 +486,15 @@ def person_detail(request, actor_id):
     return Response(serializer.data)
 
 
+# @api_view(['GET'])
+# def movie_recommendation(request, title):
+#     recommended_movies = recommend_movies(request.user.id, title)  # user_id 대신 request.user를 전달합니다.
+#     serializer = MovieRecommendSerializer(recommended_movies, many=True)
+#     return Response({'recommended_movies': serializer.data})
+
+
 @api_view(['GET'])
 def movie_recommendation(request, title):
-    recommended_movies = recommend_movies(request.user.id, title)  # user_id 대신 request.user를 전달합니다.
+    recommended_movies = recommend_movies(title)
     serializer = MovieRecommendSerializer(recommended_movies, many=True)
-    return Response({'recommended_movies': serializer.data})
+    return JsonResponse({'recommended_movies': serializer.data})
