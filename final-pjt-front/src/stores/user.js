@@ -98,7 +98,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = null
         localStorage.setItem('username', '')
         userInfo.value = null
-        router.push({name: 'home'})
+        router.push({name: 'login'})
       })
   }
 

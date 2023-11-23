@@ -51,11 +51,12 @@ class ProfileSerializer(UserDetailsSerializer):
   class UserSerializer(serializers.ModelSerializer):
     class Meta:
       model = User
-      fields = ('id',)
+      fields = ('id', 'username', 'profile_image')
 
   hate_genres = GenreSerializer(many=True, read_only=True)
   like_genres = GenreSerializer(many=True, read_only=True)
   followers = UserSerializer(many=True)
+  followings = UserSerializer(many=True, read_only=True)
 
   class Meta:
     model = User

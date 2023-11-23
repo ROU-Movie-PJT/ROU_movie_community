@@ -1,9 +1,11 @@
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUserStore } from './user'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
 export const useProfileStore = defineStore('profile', () => {
+  const route = useRoute()
   const API_URL = 'http://127.0.0.1:8000'
   const userStore = useUserStore()
   const pType = ref('like')
@@ -101,6 +103,10 @@ export const useProfileStore = defineStore('profile', () => {
     })
       .then(res => {
         profileInfo.value = res.data
+        const friends = res.data.followers.filter(follower => {
+          return res.data.followings.some(following => following.id === follower.id)
+        })
+        profileInfo.value.friends = friends
         updateChoice()
       })
   }
@@ -144,6 +150,24 @@ export const useProfileStore = defineStore('profile', () => {
       })
   }
 
+  const follow = function (userId) {
+    axios({
+      method: 'post',
+      url: `${API_URL}/accounts/follow/${userId}/`,
+      headers: {
+        Authorization: `Token ${userStore.token}`
+      }
+    })
+      .then(res => {
+        if (route.params.userId === userStore.user) {
+          getProfile(userStore.user)
+        } else {
+          profileInfo.value.followers = res.data.followers
+          profileInfo.value.followings = res.data.followings
+        }
+      })
+  }
+
   return { 
     API_URL, 
     profileInfo, 
@@ -153,6 +177,7 @@ export const useProfileStore = defineStore('profile', () => {
     pType,
     updateProfile,
     updateChoice,
-    initChoice
+    initChoice,
+    follow
    }
 }, { persist: true })

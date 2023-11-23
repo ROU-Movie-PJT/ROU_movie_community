@@ -10,7 +10,6 @@
   const profileImageRef = ref()
   const imagePath = ref(userStore.userInfo.profile_image)
   const profilePath = ref(`http://localhost:8000${imagePath.value}`)
-  
 
   const changeProfileImage = function () {
     profilePath.value = window.URL.createObjectURL(profileImageRef.value.files[0])
@@ -117,6 +116,7 @@
 
   .profile-image {
     width: 100%;
+    height: 100%;
   }
 </style>
 
