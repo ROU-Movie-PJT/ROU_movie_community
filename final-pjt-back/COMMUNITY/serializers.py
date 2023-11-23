@@ -109,7 +109,7 @@ class ReviewListSerializer(serializers.ModelSerializer):
     class MovieSerializer(serializers.ModelSerializer):
         class Meta:
             model = Movie
-            fields = ('id', 'title',)
+            fields = ('movie_id', 'title',)
 
     write_review_movie = MovieSerializer(read_only=True)  # 게시글이 달린 영화
     write_review_user = UserSerializer(read_only=True)  # 게시글 작성자
@@ -137,7 +137,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     class MovieSerializer(serializers.ModelSerializer):
         class Meta:
             model = Movie
-            fields = ('id', 'title',)
+            fields = ('movie_id', 'title',)
 
     write_review_movie = MovieSerializer(read_only=True)  # 게시글이 달린 영화
     write_review_user = UserSerializer(read_only=True)  # 게시글 작성자

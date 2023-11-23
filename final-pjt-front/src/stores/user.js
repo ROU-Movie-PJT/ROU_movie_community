@@ -43,6 +43,21 @@ export const useUserStore = defineStore('user', () => {
       })
   }
 
+  const userInfo = ref()
+
+  const getUserInfo = function () {
+    axios({
+      method: 'get',
+      url: `${API_URL}/accounts/profile/${user.value}/`,
+      headers: {
+        Authorization: `Token ${token.value}`
+      }
+    })
+      .then(res => {
+        userInfo.value = res.data
+      })
+  }
+
   const login = function (payload) {
     const username = payload.username
     const password = payload.password
@@ -59,6 +74,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = res.data.key
         user.value = res.data.user
         localStorage.setItem('username', username)
+        getUserInfo()
         console.log('로그인 성공')
         router.push({name: 'home'})
 
@@ -80,6 +96,7 @@ export const useUserStore = defineStore('user', () => {
       .then(() => {
         token.value = null
         localStorage.setItem('username', '')
+        userInfo.value = null
         router.push({name: 'home'})
       })
   }
@@ -92,36 +109,14 @@ export const useUserStore = defineStore('user', () => {
     }
   })
 
-  const userInfo = ref()
-
-  const getUserInfo = function () {
-    axios({
-      method: 'get',
-      url: `${API_URL}/accounts/profile/${user.value}/`,
-      headers: {
-        Authorization: `Token ${token.value}`
-      }
-    })
-      .then(res => {
-        userInfo.value = res.data
-      })
-  }
-
-  const updateUserInfo = function (payload) {
-    const profileImage = payload.profileImage
-    const region = payload.region
-    const birth = payload.birth
+  const updateUserInfo = function (formData) {
     axios({
       method: 'put',
       url: `${API_URL}/accounts/profile/${user.value}/`,
       headers: {
         Authorization: `Token ${token.value}`
       },
-      data: {
-        profileImage,
-        region,
-        birth
-      }
+      data: formData,
     })
       .then(res => {
         userInfo.value = res.data

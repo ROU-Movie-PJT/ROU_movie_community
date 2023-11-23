@@ -151,8 +151,10 @@ def recommend_movies(user_id, title):
 
         movie_indices = [i[0] for i in sim_scores]
 
+
         # movie_indices를 사용하여 추천된 영화의 제목을 가져오기
         recommended_titles = df['title'].iloc[movie_indices]
+
 
         # 추천된 제목과 일치하는 Movie 인스턴스 검색
         recommended_movie_instances = Movie.objects.filter(
