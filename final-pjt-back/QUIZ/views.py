@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-
+from ACCOUNTS.serializers import ProfileSerializer
 from .models import *
 from .serializers import *
 
@@ -28,7 +28,7 @@ def index(request):
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        
+
         # POST 요청 처리 로직
         if request.user.is_authenticated:
             serializer = QuizSerializer(data=request.data)
@@ -40,113 +40,69 @@ def index(request):
             return Response({"detail": "인증된 사용자만 퀴즈를 생성할 수 있습니다."}, status=status.HTTP_403_FORBIDDEN)
 
 
-@api_view(['GET', 'PUT', 'DELETE', 'POST'])
+@api_view(['GET', 'PUT', 'DELETE'])
+# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @permission_classes([IsAuthenticatedOrReadOnly])
-def quiz_detail(request, quiz_pk):
-    """단일 퀴즈 조회 및 관리."""
-    quiz = get_object_or_404(Quiz, pk=quiz_pk)
+def quiz_detail_or_update_or_delete(request, quiz_pk):
+    quiz = get_object_or_404(pk=quiz_pk)
 
-    if request.method == 'GET':
-        return _quiz_detail(quiz)
-    elif request.method == 'POST':
-        return _quiz_create(request)
-    elif request.method == 'PUT':
-        if request.user == quiz.write_quiz_user:
-            return _quiz_update(request, quiz)
-    elif request.method == 'DELETE':
-        if request.user == request.user.is_superuser:
-            return _quiz_delete(quiz)
-
-
-def _quiz_detail(quiz):
-    serializer = QuizSerializer(quiz)
-    return Response(serializer.data)
-
-
-def _quiz_create(request):
-    quiz = Quiz(question=request.data.get('question'))
-    quiz.write_quiz_user = request.user
-    quiz.save()
-
-    items_data = request.data.get('items')
-    if items_data:
-        for item_data in items_data:
-            QuizItem.objects.create(quiz=quiz, **item_data)
-
-    serializer = QuizSerializer(quiz)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-def _quiz_update(request, quiz):
-    serializer = QuizSerializer(quiz, data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
-        items_data = request.data.get('items')
-        if items_data:
-            quiz.items.all().delete()
-            for item_data in items_data:
-                QuizItem.objects.create(quiz=quiz, **item_data)
+    def quiz_detail():
+        serializer = QuizSerializer(quiz)
         return Response(serializer.data)
 
+    def quiz_update():
+        if request.user == quiz.write_quiz_user:
+            serializer = QuizSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
 
-def _quiz_delete(quiz):
-    quiz.delete()
-    return Response({'delete': f'퀴즈 {quiz.pk}번이 삭제되었습니다.'},
-                    status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
-@permission_classes([IsAuthenticatedOrReadOnly])
-def quiz_item_detail(request, quiz_pk):
-    """퀴즈 아이템 상세보기 및 관리."""
-    quiz = get_object_or_404(Quiz, pk=quiz_pk)
+    def quiz_delete():
+        if request.user == quiz.write_review_user:
+            quiz.delete()
+            data = {
+                'delete': f'퀴즈 {quiz_pk}번이 삭제되었습니다.'
+            }
+        return Response(data, status=status.HTTP_204_NO_CONTENT)
 
     if request.method == 'GET':
-        return _quiz_item_detail_view(quiz)
-    elif request.method == 'POST':
-        return _quiz_item_create(request, quiz)
+        return quiz_detail()
     elif request.method == 'PUT':
+        if request.user == quiz.write_review_user:
+            return quiz_update()
+    elif request.method == 'DELETE':
+        if request.user == quiz.write_review_user:
+            return quiz_delete()
+
+
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def quiz_item_detail(request, quiz_pk, quiz_item_pk):
+    """퀴즈 아이템 상세보기 및 관리."""
+    quiz = get_object_or_404(Quiz, pk=quiz_pk)
+    item = get_object_or_404(QuizItem, pk=quiz_item_pk)
+
+    def _quiz_item_update():
+        serializer = QuizItemSerializer(item, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def _quiz_item_delete(request, quiz):
+        if request.user != quiz.write_quiz_user and not request.user.is_superuser:
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        item = get_object_or_404(
+            QuizItem, pk=request.query_params.get('item_id', 0))
+        item.delete()
+        return Response({'delete': 'Quiz item deleted'}, status=status.HTTP_204_NO_CONTENT)
+
+    if request.method == 'PUT':
         return _quiz_item_update(request, quiz)
     elif request.method == 'DELETE':
         return _quiz_item_delete(request, quiz)
 
-
-def _quiz_item_detail_view(quiz):
-    items = QuizItem.objects.filter(quiz=quiz)
-    serializer = QuizItemSerializer(items, many=True)
-    return Response(serializer.data)
-
-
-def _quiz_item_create(request, quiz):
-    if request.user != quiz.write_quiz_user:
-        return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    serializer = QuizItemSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save(quiz=quiz)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-def _quiz_item_update(request, quiz):
-    if request.user != quiz.write_quiz_user:
-        return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    item = get_object_or_404(QuizItem, pk=request.data.get('item_id', 0))
-    serializer = QuizItemSerializer(item, data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                                    
-
-def _quiz_item_delete(request, quiz):
-    if request.user != quiz.write_quiz_user and not request.user.is_superuser:
-        return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    item = get_object_or_404(QuizItem, pk=request.query_params.get('item_id', 0))
-    item.delete()
-    return Response({'delete': 'Quiz item deleted'}, status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -173,6 +129,7 @@ def submit_quiz(request, quiz_pk):
     )
 
     return Response({'is_correct': is_correct})
+
 
 def check_if_correct(quiz, user_answer_id):
     """Check if the user's answer is correct for the given quiz."""
@@ -213,7 +170,7 @@ def user_quiz_attempts(request):
 def user_correct_quiz_count(request):
     correct_count = UserQuizAttempt.objects.filter(
         user=request.user, answered_correctly=True).count()
-    
+
     user = request.user
     if correct_count >= 20:
         user.rate_image = 'https://icons8.com/icon/33486/gold-medal'
@@ -231,8 +188,8 @@ def user_correct_quiz_count(request):
     serializer = ProfileSerializer(user)
     return Response(serializer.data)
 
+
 @api_view(['GET', 'POST'])
-# 인증된 사용자는 모든 요청 가능, 인증되지 않은 사용자는 GET만 가능
 @permission_classes([IsAuthenticatedOrReadOnly])
 def quiz_item_list_or_create(request, quiz_pk):
     quiz = get_object_or_404(Quiz, pk=quiz_pk)
@@ -240,15 +197,27 @@ def quiz_item_list_or_create(request, quiz_pk):
     def quiz_item_list():
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
     def quiz_item_create():
-        serializer = QuizItemSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            serializer = QuizSerializer(quiz)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if isinstance(request.data, list):
+            items = []
+            for item_data in request.data:
+                # 'quiz' 필드를 요청 데이터에 추가합니다.
+                item_data['quiz'] = quiz_pk
+                item_serializer = QuizItemSerializer(data=item_data)
+                if item_serializer.is_valid(raise_exception=True):
+                    item = item_serializer.save()
+                    items.append(item)
+            return Response(QuizItemSerializer(items, many=True).data, status=status.HTTP_201_CREATED)
+        else:
+            # 'quiz' 필드를 단일 객체 데이터에 추가합니다.
+            request.data['quiz'] = quiz_pk
+            serializer = QuizItemSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     if request.method == 'GET':
         return quiz_item_list()
     elif request.method == 'POST':
-        return quiz_item_create()    
+        return quiz_item_create()
