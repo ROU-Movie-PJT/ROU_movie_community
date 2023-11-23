@@ -1,41 +1,39 @@
 <script setup>
   import { ref } from 'vue'
   import { useUserStore } from '../stores/user';
-  import { RouterLink } from 'vue-router';
 
   const store = useUserStore()
 
-  const username = ref('')
-  const password = ref('')
+  const password1 = ref('')
+  const password2 = ref('')
 
-  const login = function () {
+  const changePassword = function () {
     const payload = {
-      username: username.value,
-      password: password.value
+      new_password1: password1.value,
+      new_password2: password2.value
     }
 
-    store.login(payload)
+    store.changePassword(payload)
   }
 </script>
 
 <template>
   <div class="content-box">
     <div class="login-box">
-      <h2><b>로그인</b></h2>
-      <form class="login-form" @submit.prevent="login">
+      <h2><b>비밀번호 변경</b></h2>
+      <form class="login-form" @submit.prevent="changePassword">
         <div class="login-item">
-          <label for="username">아이디</label>
-          <input required class="input" type="text" id="username" v-model.trim="username">
+          <label for="password1">새 비밀번호</label>
+          <input required class="input" type="password" id="password1" v-model.trim="password1">
         </div>
         <div class="login-item">
-          <label for="password">비밀번호</label>
-          <input required class="input" type="password" id="password" v-model.trim="password">
+          <label for="password2">새 비밀번호 확인</label>
+          <input required class="input" type="password" id="password2" v-model.trim="password2">
         </div>
+        <span class="sm-font" v-if="store.changePasswordErrMsg.new_password2">* {{ store.changePasswordErrMsg.new_password2 }}</span>
         <hr>
-        <span class="sm-font" v-if="store.loginErrMsg.non_field_errors">* {{ store.loginErrMsg.non_field_errors }}</span>
-        <button type="submit" class="login-btn">로그인</button>
+        <button type="submit" class="login-btn">비밀번호 변경</button>
       </form>
-      <RouterLink :to="{name: 'register'}">회원가입</RouterLink>
     </div>
   </div>
 </template>

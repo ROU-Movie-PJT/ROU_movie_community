@@ -7,7 +7,6 @@
   const modalRef = ref()
 
   const isLike = computed(() => {
-    console.log(profileStore.pType === 'like')
     return profileStore.pType === 'like'
   })
 

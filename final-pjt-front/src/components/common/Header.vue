@@ -1,6 +1,6 @@
 <script setup>
   import { ref } from 'vue'
-  import { createRouterMatcher, useRouter } from 'vue-router'
+  import { useRouter } from 'vue-router'
   import { useUserStore } from '../../stores/user'
   
   const store = useUserStore()
@@ -19,6 +19,7 @@
 
   const search = function () {
     router.push({name: 'search', params: {keyword: keyword.value}})
+    keyword.value = ''
   }
 </script>
 

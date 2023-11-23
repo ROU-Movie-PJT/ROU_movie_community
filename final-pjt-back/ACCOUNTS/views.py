@@ -25,7 +25,9 @@ def profile(request, user_pk):
   user = get_object_or_404(User, pk=user_pk)
   if request.method == 'GET':
     serializer = ProfileSerializer(user)
-    return Response(serializer.data)
+    list_serializer = UserMovieListSerializer(user).data
+    list_serializer.update(serializer.data)
+    return Response(list_serializer)
   elif request.method == 'PUT':
     if request.user == user:
       serializer = ProfileSerializer(instance=user, data=request.data, partial=True)

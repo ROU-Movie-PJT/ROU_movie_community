@@ -158,7 +158,10 @@ export const useMovieStore = defineStore('movies', () => {
   const getContentRecommendMovies = function() {
     axios({
       method: 'get',
-      url: `${API_URL}/movies/recommend/${movieDetail.value.title}`
+      url: `${API_URL}/movies/recommend/${movieDetail.value.title}`,
+      headers: {
+        Authorization: `Token ${userStore.token}`
+      }
     })
       .then(res => {
         contentRecommendMovies.value = res.data.recommended_movies
