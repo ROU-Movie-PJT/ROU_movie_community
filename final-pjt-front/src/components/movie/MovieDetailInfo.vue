@@ -15,7 +15,7 @@
   }
 
   const createReview = function() {
-    router.push({name: 'create', params: {movieId: store.movieDetail.id}})
+    router.push({name: 'create', params: {movieId: store.movieDetail.movie_id}})
   }
 </script>
 
@@ -77,7 +77,7 @@
       </div>
       <MovieTrailer :movie="store.movieDetail" />
     </div>
-    <img class="poster" :src=image(store.movieDetail.poster_path) alt="">
+    <img v-if="store.movieDetail.poster_path" class="poster" :src=image(store.movieDetail.poster_path) alt="">
   </div>
 </template>
 

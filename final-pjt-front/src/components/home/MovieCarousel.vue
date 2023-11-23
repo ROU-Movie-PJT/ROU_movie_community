@@ -11,7 +11,7 @@
 </script>
 
 <template>
-  <Carousel :items-to-show="1" :snap-align="center" autoplay="3000" :wrap-around="true">
+  <Carousel :items-to-show="1" autoplay="3000" :wrap-around="true">
     <template v-for="movie in store.trendMovies" :key="movie">
       <Slide v-if="movie.videos">
         <div class="carousel__item">
