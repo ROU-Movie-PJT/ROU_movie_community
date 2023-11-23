@@ -4,6 +4,7 @@ from django.conf import settings
 
 class Quiz(models.Model):
     question = models.CharField(max_length=100)
+
     write_quiz_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='write_quiz')
     correct_quiz_users = models.ManyToManyField(
