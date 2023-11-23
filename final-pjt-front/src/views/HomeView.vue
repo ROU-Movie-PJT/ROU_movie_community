@@ -117,7 +117,7 @@
   }
 
   .carousel__slide {
-    margin: .5rem;
+    padding: 10px;
   }
 
   .sort-title {

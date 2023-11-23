@@ -35,32 +35,32 @@
         <div class="register-item">
           <label for="username">아이디</label>
           <span class="sm-font" v-if="store.registerErrMsg.username">* {{ store.registerErrMsg.username }}</span>
-          <input required class="input" type="text" id="username" v-model="username">
+          <input required class="input" type="text" id="username" v-model.trim="username">
         </div>
         <div class="register-item">
           <label for="password1">비밀번호</label>
           <span class="sm-font" v-if="store.registerErrMsg.password1">* {{ store.registerErrMsg.password1 }}</span>
-          <input required class="input" type="password" id="password1" v-model="password1">
+          <input required class="input" type="password" id="password1" v-model.trim="password1">
         </div>
         <div class="register-item">
           <label for="password2">비밀번호 재확인</label>
           <span class="sm-font" v-if="store.registerErrMsg.password2">* {{ store.registerErrMsg.password2 }}</span>
-          <input required class="input" type="password" id="password2" v-model="password2">
+          <input required class="input" type="password" id="password2" v-model.trim="password2">
         </div>
         <div class="register-item">
           <label for="email">이메일</label>
           <span class="sm-font" v-if="store.registerErrMsg.email">* {{ store.registerErrMsg.email }}</span>
-          <input required class="input" type="email" id="email" v-model="email">
+          <input required class="input" type="email" id="email" v-model.trim="email">
         </div>
         <div class="register-item">
           <label for="birth">생년월일</label>
           <span class="sm-font" v-if="store.registerErrMsg.birth">* {{ store.registerErrMsg.birth }}</span>
-          <input required class="input" type="date" id="birth" v-model="birth">
+          <input required class="input" type="date" id="birth" v-model.trim="birth">
         </div>
         <div class="register-item">
           <label for="region">지역</label>
           <span class="sm-font" v-if="store.registerErrMsg.region">* {{ store.registerErrMsg.region }}</span>
-          <input required class="input" type="text" id="region" v-model="region">
+          <input required class="input" type="text" id="region" v-model.trim="region">
         </div>
         <hr>
         <span class="sm-font" v-if="store.registerErrMsg.non_field_errors">* {{ store.registerErrMsg.non_field_errors }}</span>

@@ -155,4 +155,4 @@ export const useProfileStore = defineStore('profile', () => {
     updateChoice,
     initChoice
    }
-}, {persist: true})
+}, { persist: true })

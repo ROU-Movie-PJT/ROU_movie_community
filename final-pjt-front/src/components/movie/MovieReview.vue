@@ -1,4 +1,5 @@
 <script setup>
+  import { RouterLink } from 'vue-router';
   defineProps({
     review: Object
   })
@@ -6,13 +7,15 @@
   const image = function(path) {
     return `http://localhost:8000${path}`
   }
+
+  const defaultImagePath = '/src/assets/profile.png'
 </script>
 
 <template>
   <div class="review-content">
     <div class="left-box">
       <div class="circle">
-        <img class="writer-img" :src="image(review.write_review_user.profile_image)" alt="">
+        <img class="writer-img" :src="review.write_review_user.profile_image ? image(review.write_review_user.profile_image) : defaultImagePath" alt="" >
       </div>
       <div class="text-box">
         <p class="title">{{ review.title }}</p>
@@ -34,7 +37,7 @@
           <span>{{ review.dislike_review_users.length }}</span>
         </div>
       </div>
-      <p class="writer">by. {{ review.write_review_user.username }}</p>
+      <p class="writer">by. <RouterLink class="link" :to="{name: 'profile', params: {userId: review.write_review_user.id}}">{{ review.write_review_user.username }}</RouterLink></p>
     </div>
   </div>
 </template>
@@ -97,5 +100,9 @@
   .icon-list {
     display: flex;
     gap: 1rem;
+  }
+
+  .link:visited {
+    color: grey;
   }
 </style>

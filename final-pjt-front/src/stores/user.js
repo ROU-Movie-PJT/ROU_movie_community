@@ -12,6 +12,7 @@ export const useUserStore = defineStore('user', () => {
   const registerErrMsg = ref({})
 
   const loginErrMsg = ref({})
+  const changePasswordErrMsg = ref({})
 
   const register = function(payload) {
     const username = payload.username
@@ -76,8 +77,8 @@ export const useUserStore = defineStore('user', () => {
         localStorage.setItem('username', username)
         getUserInfo()
         console.log('로그인 성공')
+        loginErrMsg.value = {}
         router.push({name: 'home'})
-
       })
       .catch(err => {
         loginErrMsg.value = {}
@@ -120,8 +121,65 @@ export const useUserStore = defineStore('user', () => {
     })
       .then(res => {
         userInfo.value = res.data
+        router.push({name: 'profile', params: {userId: user.value}})
       })
   }
 
-  return {token, API_URL, register, registerErrMsg, login, loginErrMsg, isLogin, logout, user, getUserInfo, userInfo, updateUserInfo}
+  const changePassword = function (payload) {
+    const new_password1 = payload.new_password1
+    const new_password2 = payload.new_password2
+    axios({
+      method: 'post',
+      url: `${API_URL}/accounts/password/change/`,
+      headers: {
+        Authorization: `Token ${token.value}`
+      },
+      data: {
+        new_password1,
+        new_password2
+      }
+    })
+      .then(() => {
+        console.log('비밀번호 변경 완료!')
+        changePasswordErrMsg.value = {}
+        router.push({name: 'profile', params: {userId: user.value}})
+      })
+      .catch(err => {
+        changePasswordErrMsg.value = {}
+        for (const key in err.response.data) {
+          changePasswordErrMsg.value[key] = err.response.data[key][0]
+        }
+      })
+  }
+
+  const resign = function () {
+    axios({
+      method: 'post',
+      url: `${API_URL}/accounts/delete/`,
+      headers: {
+        Authorization: `Token ${token.value}`
+      }
+    })
+      .then(() => {
+        logout()
+      })
+  }
+
+  return {
+    token, 
+    API_URL, 
+    register, 
+    registerErrMsg, 
+    login, 
+    loginErrMsg, 
+    isLogin, 
+    logout, 
+    user, 
+    getUserInfo, 
+    userInfo, 
+    updateUserInfo,
+    changePassword,
+    changePasswordErrMsg,
+    resign
+  }
 }, { persist: true })

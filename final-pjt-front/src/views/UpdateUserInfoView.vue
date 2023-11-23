@@ -1,6 +1,7 @@
 <script setup>
   import { ref, onMounted } from 'vue'
   import { useUserStore } from '../stores/user'
+  import { RouterLink } from 'vue-router';
 
   const userStore = useUserStore()
 
@@ -17,7 +18,9 @@
 
   const updateInfo = function () {
     const formData = new FormData()
-    formData.append('profile_image', profileImageRef.value.files[0])
+    if (profileImageRef.value.files.length) {
+      formData.append('profile_image', profileImageRef.value.files[0])
+    }
     formData.append('region', region.value)
     formData.append('birth', birth.value)
     console.log(formData)
@@ -48,6 +51,7 @@
         <hr>
         <button type="submit" class="update-btn">수정</button>
       </form>
+      <RouterLink :to="{name: 'change_password'}">비밀번호 변경</RouterLink>
     </div>
   </div>
 </template>

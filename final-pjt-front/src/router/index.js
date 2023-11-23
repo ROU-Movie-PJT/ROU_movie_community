@@ -7,6 +7,7 @@ import CreateView from '../views/CreateView.vue'
 import UpdateUserInfoView from '../views/UpdateUserInfoView.vue'
 import SearchResultView from '../views/SearchResultView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import ChangePasswordView from '../views/ChangePasswordView.vue'
 
 const router = createRouter({
   scrollBehavior(to, from) {
@@ -53,6 +54,11 @@ const router = createRouter({
       path: '/profile/:userId',
       name: 'profile',
       component: ProfileView
+    },
+    {
+      path: '/accounts/change_password',
+      name: 'change_password',
+      component: ChangePasswordView
     }
   ]
 })
