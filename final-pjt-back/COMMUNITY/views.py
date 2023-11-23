@@ -104,7 +104,8 @@ def review_create_with_movie(request, movie_pk):
 def review_detail_or_update_or_delete(request, review_pk):
     reviews = Review.objects.annotate(
         comment_count=Count('review_comment', distinct=True),  # 댓글 수
-        like_count=Count('like_review_users', distinct=True))  # 좋아요 수
+        like_count=Count('like_review_users', distinct=True),  # 좋아요 수
+        dislike_count=Count('dislike_review_users', distinct=True))
     review = get_object_or_404(reviews, pk=review_pk)
 
     def review_detail():

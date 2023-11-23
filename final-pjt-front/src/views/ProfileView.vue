@@ -4,12 +4,14 @@
   import { useProfileStore } from '../stores/profile'
   import { useUserStore } from '../stores/user'
   import UpdateModal from '../components/profile/UpdateModal.vue'
+  import MovieCard from '../components/home/MovieCard.vue'
 
   const profileStore = useProfileStore()
   const userStore = useUserStore()
   const route = useRoute()
   const router = useRouter()
   const userId = ref(route.params.userId)
+  const category = ref(3)
 
   onMounted(() => {
     profileStore.getProfile(userId.value)
@@ -17,7 +19,6 @@
 
   onBeforeRouteUpdate((to, from) => {
     userId.value = to.params.userId
-    profileStore.getProfile(to.params.userId)
   })
 
   const image = function (path) {
@@ -45,6 +46,14 @@
   }
 
   const defaultImagePath = '/src/assets/profile.png'
+
+  const selectCategory = function (idx) {
+    category.value = idx
+  }
+
+  const goDetail = function (id) {
+    router.push({name: 'movie_detail', params: {id: id}})
+  }
 </script>
 
 <template>
@@ -83,6 +92,20 @@
           <img :src="friend.profile_image ? image(friend.profile_image) : defaultImagePath" alt="" class="profile-img">
         </div>
         <p>{{ friend.username }}</p>
+      </div>
+    </div>
+    <div class="user-movie">
+      <div v-if="category === 0" class="like-movie-list">
+        <MovieCard v-for="movie in profileStore.profileInfo.like_movies" :key="movie" :item="movie" @click="goDetail(movie.movie_id)" />
+      </div>
+      <div v-else-if="category === 1" class="favorite-movie-list">
+        <MovieCard v-for="movie in profileStore.profileInfo.favorite_movies" :key="movie" :item="movie" @click="goDetail(movie.movie_id)" />
+      </div>
+      <div v-else-if="category === 2" class="watching-movie-list">
+        <MovieCard v-for="movie in profileStore.profileInfo.watching_movies" :key="movie" :item="movie" @click="goDetail(movie.movie_id)" />
+      </div>
+      <div v-else-if="category === 3" class="dislike-movie-list">
+        <MovieCard v-for="movie in profileStore.profileInfo.dislike_movies" :key="movie" :item="movie" @click="goDetail(movie.movie_id)" />
       </div>
     </div>
     <UpdateModal />

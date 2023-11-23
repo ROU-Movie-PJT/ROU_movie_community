@@ -168,6 +168,10 @@ export const useProfileStore = defineStore('profile', () => {
       })
   }
 
+  // const getLikeMovies = funcion () {
+
+  // }
+
   return { 
     API_URL, 
     profileInfo, 

@@ -26,7 +26,7 @@
         <RouterLink class="link" to="/">Quiz</RouterLink>
       </li>
       <li>
-        <RouterLink class="link" to="/">Review</RouterLink>
+        <RouterLink class="link" :to="{name: 'community'}">Community</RouterLink>
       </li>
     </ul>
   </div>

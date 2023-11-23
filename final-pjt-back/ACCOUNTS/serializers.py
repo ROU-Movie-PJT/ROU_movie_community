@@ -21,17 +21,17 @@ class UserMovieListSerializer(serializers.ModelSerializer):
     # 좋아요한 영화 목록
     like_movies = MovieSerializer(many=True)
     # 싫어요한 영화 목록
-    dislike_movie = MovieSerializer(many=True)
+    dislike_movies = MovieSerializer(many=True)
     # 찜한 영화 목록
-    watching_movie = MovieSerializer(many=True)
+    watching_movies = MovieSerializer(many=True)
     # 시청한 영화 목록
-    favorite_movie = MovieSerializer(many=True)
+    favorite_movies = MovieSerializer(many=True)
 
     class Meta:
         model = User
         # 사용자 id, 평가한 영화 목록, 좋아요한 영화 목록, 위시리스트에 담은 영화 목록
-        fields = ('id', 'like_movies', 'dislike_movie',
-                  'watching_movie', 'favorite_movie',)
+        fields = ('like_movies', 'dislike_movies',
+                  'watching_movies', 'favorite_movies',)
 
 class CustomRegisterSerializer(RegisterSerializer):
   region = serializers.CharField(max_length=50)

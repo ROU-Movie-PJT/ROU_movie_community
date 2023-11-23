@@ -3,13 +3,6 @@
   import NavBar from './components/common/NavBar.vue'
   import Header from './components/common/Header.vue'
   import TopBtn from './components/common/TopBtn.vue'
-  import { onMounted } from 'vue'
-  import { useMovieStore } from './stores/movies'
-
-  const store = useMovieStore()
-
-  store.getRecommendMovies()
-  store.getTrendMovies()
 </script>
 
 <template>
