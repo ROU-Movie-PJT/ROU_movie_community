@@ -112,6 +112,8 @@ from django.contrib.auth import get_user_model  # User 모델을 가져옴
 from .models import *
 import pandas as pd
 
+User = get_user_model()
+
 
 def recommend_movies(user_id, title):
     try:

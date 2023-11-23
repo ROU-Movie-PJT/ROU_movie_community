@@ -402,7 +402,7 @@ def movie_watching(request, movie_pk):
 # 인증된 사용자만 권한 허용
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def movie_favorite(request, movie_pk, quiz_item_pk):
+def movie_favorite(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     user = request.user
 
