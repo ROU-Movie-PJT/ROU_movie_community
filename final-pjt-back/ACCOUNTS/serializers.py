@@ -59,7 +59,7 @@ class ProfileSerializer(UserDetailsSerializer):
 
   class Meta:
     model = User
-    fields = ('id', 'followers', 'username', 'profile_image', 'region', 'followings', 'hate_genres', 'like_genres', 'birth', 'rate_image')
+    fields = ('id', 'followers', 'username', 'profile_image', 'region', 'followings', 'hate_genres', 'like_genres', 'birth', 'rate_image', 'score',)
 
 # 사용자 불호 장르 조회/수정
 class HateGenreSerializer(serializers.ModelSerializer):
