@@ -2,10 +2,12 @@
   import { RouterView } from 'vue-router'
   import NavBar from './components/common/NavBar.vue'
   import Header from './components/common/Header.vue'
+  import TopBtn from './components/common/TopBtn.vue'
 </script>
 
 <template>
   <div class="content">
+    <TopBtn href="#" />
     <NavBar />
     <Header />
     <main>

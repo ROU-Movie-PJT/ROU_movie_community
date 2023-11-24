@@ -1,14 +1,38 @@
 <script setup>
   import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
+  import { useUserStore } from '../../stores/user'
+  
+  const store = useUserStore()
+  const router = useRouter()
   const isSearching = ref(false)
+
+  const goLogin = function () {
+    router.push({name: 'login'})
+  }
+
+  const goRegister = function () {
+    router.push({name: 'register'})
+  }
+
+  const keyword = ref()
+
+  const search = function () {
+    router.push({name: 'search', params: {keyword: keyword.value}})
+    keyword.value = ''
+  }
 </script>
 
 <template>
   <div class="header">
     <nav class="header-nav">
-      <button class="login-btn">로그인</button>
-      <form class="search-bar">
-        <input class="input-text" type="text" placeholder="영화 제목, 감독 이름으로 검색 가능">
+      <button v-if="store.isLogin" class="login-btn" @click="store.logout">로그아웃</button>
+      <div class="btn-box" v-else>
+        <button class="login-btn" @click="goRegister">회원가입</button>
+        <button class="login-btn" @click="goLogin">로그인</button>
+      </div>
+      <form class="search-bar" @submit.prevent="search">
+        <input class="input-text" type="text" placeholder="영화 제목, 감독 이름으로 검색 가능" v-model="keyword">
         <button v-if="!isSearching" class="search-btn" type="submit">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#clip0_10_294)">
@@ -93,6 +117,11 @@
     border: none;
     border-radius: 5px;
     font-size: 1rem;
+  }
+
+  .btn-box {
+    display: flex;
+    gap: .5rem; 
   }
 
   @media screen and (max-width: 47em) {

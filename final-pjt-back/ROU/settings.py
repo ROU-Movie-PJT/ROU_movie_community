@@ -11,10 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
-# secret key 호출을 위해 import
-import os, json
-from django.core.exceptions import ImproperlyConfigured 
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h-yugk*_%y3t%i9$ym($^h7^122a@yp$ty3#7gma&l+v6))sp1'
+SECRET_KEY = 'django-insecure-(qj32z0l8)go-m68245l)g+%pto2nj$ocj)8onaix)#vk3p**z'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -36,32 +33,24 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     # local apps
+    'MOVIES',
     'ACCOUNTS',
     'COMMUNITY',
-    'MOVIES',
-    'QUIZZES',
-
+    'QUIZ',
+    # 'MESSENGER',
 
     # 3rd party apps
-    'django_extensions',
-    'corsheaders', # CORS 세팅
     'rest_framework',
-    'rest_framework.authtoken', # token 기반 auth
-
-
-    # django all auth
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'corsheaders',
+    'haystack',
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.naver', # allauth naver
-    'allauth.socialaccount.providers.kakao', # allauth KaKao
-    
-    
-    # DRF auth
-    'dj_rest_auth', # sign 제외 auth 관련 담당
-    'dj_rest_auth.registration', # signup 담당
+    'dj_rest_auth.registration',
 
-    
     # native apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -69,34 +58,25 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-
-    # dj-rest-auth signup 필요
-    'django.contrib.sites',
 ]
-
 
 SITE_ID = 1
 
-
-# 회원가입 재정의
-REST_AUTH_REGISTER_SERIALIZERS = {
-    'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.account.AccountSignUpSerializer',
+REST_FRAMEWORK = {
+    # Authentication
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication'
+    ],
+    # Permission
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
-
-# 사용자 정보 조회 재정의
-REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER' : 'ACCOUNTS.serializers.account.ProfileSerializer'
-}
-
-
-ACCOUNT_ADAPTER = 'ACCOUNTS.adapters.CustomAccountAdapter'
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # 반드시 CommonMiddleware보다 위에 위치
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -104,7 +84,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# cors settings
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
     'http://localhost:5173',
@@ -164,13 +143,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'ko-kr'
+LANGUAGE_CODE = 'ko-KR'
 
-TIME_ZONE = 'Asia/Seoul'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
-USE_L10N = True
 
 USE_TZ = True
 
@@ -180,53 +157,53 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 내장 User 모델을 재정의한 User 모델을 사용하도록 변경
-# Custom user model 정의 후 대체 
 AUTH_USER_MODEL = 'ACCOUNTS.User'
 
-
-# 모두에게 교차 출처 허용(*)
-CORS_ALLOW_ALL_ORIGINS = True
-
-# SITE_ID = 1 # django.contrib.sites
-
-REST_FRAMEWORK = {
-    # 기본 인증 방식 설정(Basic TokenAuthentication)
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-
-    # 기본 권한 설정
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated', # 인증받은 자에게 권한 허용
-        # 'rest_framework.permissions.AllowAny', # 모두에게 권한 허용
-    ]
+REST_AUTH = {
+    'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer',
+    'USER_DETAILS_SERIALIZER': 'ACCOUNTS.serializers.ProfileSerializer',
+    'TOKEN_SERIALIZER': 'ACCOUNTS.serializers.CustomTokenSerializer',
 }
 
+# REST_AUTH_REGISTER_SERIALIZERS = {
+#   'REGISTER_SERIALIZER': 'ACCOUNTS.serializers.CustomRegisterSerializer',
+# }
 
-# secret key 호출
-# secret_file = os.path.join(BASE_DIR, 'secrets.json') #secrets.json을 불러옴
+# REST_AUTH_SERIALIZERS = {
+#   'USER_DETAILS_SERIALIZER' : 'ACCOUNTS.serializers.ProfileSerializer'
+# }
 
-# with open(secret_file, 'r') as f: #open as로 secret.json을 열어줍니다.
-#     secrets = json.loads(f.read())
+ACCOUNT_ADAPTER = 'ACCOUNTS.adapters.CustomAccountsAdapter'
 
-# def get_secret(setting, secrets=secrets): #예외 처리를 통해 오류 발생을 검출합니다.
-#     try:
-#         return secrets[setting]
-#     except KeyError:
-#         error_msg = "Set the {} environment variable".format(setting)
-#         raise ImproperlyConfigured(error_msg)
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
-# SECRET_KEY = get_secret("SECRET_KEY")
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-# AUTHENTICATION_BACKENDS = [
-#     # Needed to login by username in Django admin, regardless of `allauth`
-#     'django.contrib.auth.backends.ModelBackend',
-#     # `allauth` specific authentication methods, such as login by e-mail
-#     'allauth.account.auth_backends.AuthenticationBackend',
-# ]
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+#         'LOCATION': '127.0.0.1:11211',  # IP and port where Memcached is running
+#     }
+# }
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    },
+}
