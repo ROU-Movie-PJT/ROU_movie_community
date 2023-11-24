@@ -493,9 +493,19 @@ def person_detail(request, actor_id):
 #     return Response({'recommended_movies': serializer.data})
 
 
+# @api_view(['GET'])
+# def movie_recommendation(request, title):
+#     recommended_movies = recommend_movies(request.user.id, title)
+#     serializer = MovieRecommendSerializer(recommended_movies, many=True)
+#     return Response({'recommended_movies': serializer.data})
+
+
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def movie_recommendation(request, title):
-    # user_id 대신 request.user를 전달합니다.
-    recommended_movies = recommend_movies(request.user.id, title)
-    serializer = MovieRecommendSerializer(recommended_movies, many=True)
-    return Response({'recommended_movies': serializer.data})
+    try:
+        recommended_movies = recommend_movies(request.user.id, title)
+        serializer = MovieRecommendSerializer(recommended_movies, many=True)
+        return Response({'recommended_movies': serializer.data})
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
