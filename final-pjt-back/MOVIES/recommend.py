@@ -1,3 +1,4 @@
+
 # # # from sklearn.feature_extraction.text import TfidfVectorizer
 # # # from sklearn.metrics.pairwise import linear_kernel
 # # # from django.contrib.auth.models import User
@@ -264,4 +265,6 @@ def recommend_movies(user_id, title):
     except Exception as e:
         # Log the exception for debugging
         print(f"An error occurred: {e}")
+
         return []
+

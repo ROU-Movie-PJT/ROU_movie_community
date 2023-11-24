@@ -509,3 +509,4 @@ def movie_recommendation(request, title):
         return Response({'recommended_movies': serializer.data})
     except Exception as e:
         return Response({'error': str(e)}, status=400)
+

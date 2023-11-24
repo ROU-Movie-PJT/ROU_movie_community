@@ -57,7 +57,7 @@ export const useCommunityStore = defineStore('community', () => {
     })
       .then(res => {
         //상세 페이지로 가기
-        router.push({name: 'community'})
+        router.push({name: 'community_detail', params: {reviewId: res.data.id}})
       })
   }
 
@@ -79,7 +79,7 @@ export const useCommunityStore = defineStore('community', () => {
     })
       .then(res => {
         //상세 페이지로 가기
-        router.push({name: 'community'})
+        router.push({name: 'community_detail', params: {reviewId: reviewId}})
       })
   }
 
@@ -158,7 +158,10 @@ export const useCommunityStore = defineStore('community', () => {
         content
       }
     })
-      .then(res => comments.value = res.data.reply_comments)
+      .then(res => {
+        comments.value = res.data.reply_comments
+        reviewDetail.value.comment_count = res.data.reply_comments.length
+      })
   }
 
   const updateComment = function (payload) {
@@ -197,6 +200,24 @@ export const useCommunityStore = defineStore('community', () => {
       })
   }
 
+  const deleteComment = function (payload) {
+    const reviewId = payload.reviewId
+    const commentId = payload.commentId
+
+    axios({
+      method: 'delete',
+      url: `${API_URL}/community/${reviewId}/comment/${commentId}/`,
+      headers: {
+        Authorization: `Token ${store.token}`
+      }
+    })
+      .then((res) => {
+        const data = res.data
+        const index = comments.value.findIndex(comment => comment.id === data.pk)
+        comments.value[index] = data
+      })
+  }
+
   return { 
     createMovieReview,
     reviews,
@@ -212,6 +233,7 @@ export const useCommunityStore = defineStore('community', () => {
     createComment,
     comments,
     updateComment,
-    likeComment
+    likeComment,
+    deleteComment
   }
 }, { persist: true})
