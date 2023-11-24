@@ -493,6 +493,13 @@ def person_detail(request, actor_id):
 #     return Response({'recommended_movies': serializer.data})
 
 
+# @api_view(['GET'])
+# def movie_recommendation(request, title):
+#     recommended_movies = recommend_movies(request.user.id, title)
+#     serializer = MovieRecommendSerializer(recommended_movies, many=True)
+#     return Response({'recommended_movies': serializer.data})
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def movie_recommendation(request, title):
