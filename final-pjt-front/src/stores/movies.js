@@ -4,13 +4,13 @@ import axios from 'axios'
 import { useUserStore } from './user'
 import _ from 'lodash'
 
-export const useMovieStore = defineStore('movie', () => {
+export const useMovieStore = defineStore('movies', () => {
   const API_URL = 'http://127.0.0.1:8000'
   const userStore = useUserStore()
 
   const recommendMovies = ref({})
 
-  const choice = {
+  const choice = ref({
     1: '액션',
     2: '모험',
     3: '애니메이션',
@@ -30,7 +30,7 @@ export const useMovieStore = defineStore('movie', () => {
     17: '스릴러',
     18: '전쟁',
     19: '서부',
-  }
+  })
   
   const getMovieList = function(sortNum) {
     axios({
@@ -96,7 +96,7 @@ export const useMovieStore = defineStore('movie', () => {
   const watchMovie = function () {
     axios({
       method: 'post',
-      url: `${API_URL}/movies/${movieDetail.value.id}/watching/`,
+      url: `${API_URL}/movies/${movieDetail.value.movie_id}/watching/`,
       headers: {
         Authorization: `Token ${userStore.token}`
       }
@@ -111,7 +111,7 @@ export const useMovieStore = defineStore('movie', () => {
   const likeMovie = function () {
     axios({
       method: 'post',
-      url: `${API_URL}/movies/${movieDetail.value.id}/like/`,
+      url: `${API_URL}/movies/${movieDetail.value.movie_id}/like/`,
       headers: {
         Authorization: `Token ${userStore.token}`
       }
@@ -126,7 +126,7 @@ export const useMovieStore = defineStore('movie', () => {
   const unlikeMovie = function () {
     axios({
       method: 'post',
-      url: `${API_URL}/movies/${movieDetail.value.id}/dislike/`,
+      url: `${API_URL}/movies/${movieDetail.value.movie_id}/dislike/`,
       headers: {
         Authorization: `Token ${userStore.token}`
       }
@@ -141,7 +141,7 @@ export const useMovieStore = defineStore('movie', () => {
   const favoriteMovie = function () {
     axios({
       method: 'post',
-      url: `${API_URL}/movies/${movieDetail.value.id}/favorite/`,
+      url: `${API_URL}/movies/${movieDetail.value.movie_id}/favorite/`,
       headers: {
         Authorization: `Token ${userStore.token}`
       }
@@ -153,20 +153,32 @@ export const useMovieStore = defineStore('movie', () => {
       })
   }
 
-  const genreRecommendMovies = ref([])
+  const contentRecommendMovies = ref()
 
-  const getGenreRecommendMovies = function(genres) {
-    genreRecommendMovies.value = []
-    for (const key in genres) {
-      axios({
-        method: 'get',
-        url: `${API_URL}/movies/${genres[key].genre_id}/genre/`
+  const getContentRecommendMovies = function() {
+    axios({
+      method: 'get',
+      url: `${API_URL}/movies/recommend/${movieDetail.value.title}`,
+      headers: {
+        Authorization: `Token ${userStore.token}`
+      }
+    })
+      .then(res => {
+        contentRecommendMovies.value = res.data.recommended_movies
       })
-        .then(res => {
-          genreRecommendMovies.value = genreRecommendMovies.value.concat(res.data)
-          genreRecommendMovies.value = _.uniqBy(genreRecommendMovies.value, 'movie_id')
-        })
-    }
+  }
+
+  const searchResult = ref()
+
+  const getSearchResult = function (keyword) {
+    axios({
+      method: 'get',
+      url: `${API_URL}/movies/search/`,
+      params: {
+        q: keyword
+      }
+    })
+      .then(res => searchResult.value = res.data)
   }
 
   return { 
@@ -184,7 +196,9 @@ export const useMovieStore = defineStore('movie', () => {
     likeMovie, 
     unlikeMovie, 
     favoriteMovie,
-    getGenreRecommendMovies,
-    genreRecommendMovies
+    getContentRecommendMovies,
+    contentRecommendMovies,
+    searchResult,
+    getSearchResult
   }
 }, { persist: true })

@@ -9,7 +9,7 @@
   const router = useRouter()
 
   onMounted(() => {
-    store.getGenreRecommendMovies(store.movieDetail.genres)
+    store.getContentRecommendMovies()
   })
 
   const goDetail = function (movieId) {
@@ -21,7 +21,8 @@
   <div class="recommend-list">
     <h3 class="title">"{{ store.movieDetail.title }}" 와(과) 비슷한 영화</h3>
     <div class="card-list">
-      <MovieCard @click="goDetail(movie.movie_id)" class="movie-card" v-for="movie in _.shuffle(store.genreRecommendMovies.slice(0, 21))" :item="movie"/>
+      <MovieCard @click="goDetail(movie.movie_id)" class="movie-card" v-for="movie in _.shuffle(store.contentRecommendMovies)" :item="movie"/>
+      <div class="space"></div>
     </div>
   </div>
 </template>
@@ -41,11 +42,16 @@
     display: flex;
     flex-wrap: wrap;
     gap: .5rem;
+    justify-content: space-between;
   }
 
   .title {
     font-weight: bold;
     color: white;
     margin: 0;
+  }
+
+  .space {
+    flex-grow: 1;
   }
 </style>

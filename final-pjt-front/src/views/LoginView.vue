@@ -25,11 +25,11 @@
       <form class="login-form" @submit.prevent="login">
         <div class="login-item">
           <label for="username">아이디</label>
-          <input required class="input" type="text" id="username" v-model="username">
+          <input required class="input" type="text" id="username" v-model.trim="username">
         </div>
         <div class="login-item">
           <label for="password">비밀번호</label>
-          <input required class="input" type="password" id="password" v-model="password">
+          <input required class="input" type="password" id="password" v-model.trim="password">
         </div>
         <hr>
         <span class="sm-font" v-if="store.loginErrMsg.non_field_errors">* {{ store.loginErrMsg.non_field_errors }}</span>

@@ -14,6 +14,13 @@
   const goRegister = function () {
     router.push({name: 'register'})
   }
+
+  const keyword = ref()
+
+  const search = function () {
+    router.push({name: 'search', params: {keyword: keyword.value}})
+    keyword.value = ''
+  }
 </script>
 
 <template>
@@ -24,8 +31,8 @@
         <button class="login-btn" @click="goRegister">회원가입</button>
         <button class="login-btn" @click="goLogin">로그인</button>
       </div>
-      <form class="search-bar">
-        <input class="input-text" type="text" placeholder="영화 제목, 감독 이름으로 검색 가능">
+      <form class="search-bar" @submit.prevent="search">
+        <input class="input-text" type="text" placeholder="영화 제목, 감독 이름으로 검색 가능" v-model="keyword">
         <button v-if="!isSearching" class="search-btn" type="submit">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#clip0_10_294)">

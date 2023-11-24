@@ -3,7 +3,6 @@
   import NavBar from './components/common/NavBar.vue'
   import Header from './components/common/Header.vue'
   import TopBtn from './components/common/TopBtn.vue'
-  import { onMounted } from 'vue'
 </script>
 
 <template>

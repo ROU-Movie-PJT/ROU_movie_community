@@ -15,6 +15,10 @@
     return movieId.value !== '0'
   })
 
+  const isEdit = computed(() => {
+    return route.params.name === 'community_update'
+  })
+
   const title = ref('')
   const content = ref('')
 
@@ -27,8 +31,11 @@
         content: content.value,
         movieId: movieId.value
       }
-  
-      communityStore.createReview(payload)
+      if (isReview.value) {
+        communityStore.createMovieReview(payload)
+      } else {
+        communityStore.createReview(payload)
+      }
     }
   }
 

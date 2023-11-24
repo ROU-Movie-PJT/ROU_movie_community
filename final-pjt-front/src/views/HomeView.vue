@@ -11,10 +11,8 @@
   const store = useMovieStore()
   const router = useRouter()
 
-  onMounted(() => {
-    store.getRecommendMovies()
-    store.getTrendMovies()
-  })
+  store.getRecommendMovies()
+  store.getTrendMovies()
 
   const favoriteGenres = ref({
     1: '액션',
@@ -117,7 +115,7 @@
   }
 
   .carousel__slide {
-    margin: .5rem;
+    padding: 10px;
   }
 
   .sort-title {

@@ -5,6 +5,11 @@ import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
 import CreateView from '../views/CreateView.vue'
 import UpdateUserInfoView from '../views/UpdateUserInfoView.vue'
+import SearchResultView from '../views/SearchResultView.vue'
+import ProfileView from '../views/ProfileView.vue'
+import ChangePasswordView from '../views/ChangePasswordView.vue'
+import CommunityView from '../views/CommunityView.vue'
+import CommunityDetailView from '../views/CommunityDetailView.vue'
 
 const router = createRouter({
   scrollBehavior(to, from) {
@@ -41,6 +46,36 @@ const router = createRouter({
       path: '/accounts/update',
       name: 'update_account',
       component: UpdateUserInfoView
+    },
+    {
+      path: '/search/:keyword',
+      name: 'search',
+      component: SearchResultView
+    },
+    {
+      path: '/profile/:userId',
+      name: 'profile',
+      component: ProfileView
+    },
+    {
+      path: '/accounts/change_password',
+      name: 'change_password',
+      component: ChangePasswordView
+    },
+    {
+      path: '/community',
+      name: 'community',
+      component: CommunityView
+    },
+    {
+      path: '/community/:reviewId',
+      name: 'community_detail',
+      component: CommunityDetailView
+    },
+    {
+      path: '/community/:reviewId/update',
+      name: 'community_update',
+      component: CreateView
     }
   ]
 })

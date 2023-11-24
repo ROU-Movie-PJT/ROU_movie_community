@@ -1,5 +1,13 @@
 <script setup>
+  import { computed } from 'vue'
   import { RouterLink } from 'vue-router'
+  import { useUserStore } from '../../stores/user'
+
+  const userStore = useUserStore()
+
+  const isUser = computed(() => {
+    return userStore.user !== null
+  })
 </script>
 
 <template>
@@ -11,14 +19,14 @@
       <li>
         <RouterLink class="link" :to="{name: 'home'}">Home</RouterLink>
       </li>
-      <li>
-        <RouterLink class="link" to="/">Profile</RouterLink>
+      <li v-if="isUser">
+        <RouterLink class="link" :to="{name: 'profile', params: {userId: userStore.user}}">Profile</RouterLink>
       </li>
-      <li>
+      <li v-if="isUser">
         <RouterLink class="link" to="/">Quiz</RouterLink>
       </li>
       <li>
-        <RouterLink class="link" to="/">Review</RouterLink>
+        <RouterLink class="link" :to="{name: 'community'}">Community</RouterLink>
       </li>
     </ul>
   </div>

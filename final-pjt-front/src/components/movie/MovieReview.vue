@@ -1,14 +1,26 @@
 <script setup>
+  import { RouterLink } from 'vue-router';
   defineProps({
     review: Object
   })
+
+  const image = function(path) {
+    return `http://localhost:8000${path}`
+  }
+
+  const defaultImagePath = '/src/assets/profile.png'
 </script>
 
 <template>
   <div class="review-content">
     <div class="left-box">
-      <p class="title">{{ review.title }}</p>
-      <p class="content">{{ review.content }}</p>
+      <div class="circle">
+        <img class="writer-img" :src="review.write_review_user.profile_image ? image(review.write_review_user.profile_image) : defaultImagePath" alt="" >
+      </div>
+      <div class="text-box">
+        <p class="title">{{ review.title }}</p>
+        <p class="content">{{ review.content }}</p>
+      </div>
     </div>
     <div class="right-box">
       <div class="icon-list">
@@ -25,7 +37,7 @@
           <span>{{ review.dislike_review_users.length }}</span>
         </div>
       </div>
-      <p class="writer">by. {{ review.write_review_user.username }}</p>
+      <p class="writer">by. <RouterLink class="link" :to="{name: 'profile', params: {userId: review.write_review_user.id}}">{{ review.write_review_user.username }}</RouterLink></p>
     </div>
   </div>
 </template>
@@ -39,7 +51,21 @@
   }
 
   .left-box {
+    display: flex;
+    gap: 1rem;
     flex-grow: 1;
+  }
+
+  .circle {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .writer-img {
+    height: 100%;
+    width: 100%;
   }
 
   .right-box {
@@ -74,5 +100,9 @@
   .icon-list {
     display: flex;
     gap: 1rem;
+  }
+
+  .link:visited {
+    color: grey;
   }
 </style>

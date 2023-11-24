@@ -293,7 +293,7 @@ def movie_detail(request, movie_pk):
     data = {
         'isLike': movie.like_movie_users.filter(pk=request.user.pk).exists(),
         'isFavorite': movie.favorite_movie_users.filter(pk=request.user.pk).exists(),
-        'isDislike': movie.dislike_movie_users.filter(pk=request.user.pk).exists(), 
+        'isDislike': movie.dislike_movie_users.filter(pk=request.user.pk).exists(),
         'isWatch': movie.watching_movie_users.filter(pk=request.user.pk).exists()
     }
 
@@ -333,7 +333,7 @@ def movie_like(request, movie_pk):
     serializer = MovieLikeSerializer(movie)
 
     like_movie_register = {
-        'id': serializer.data.get('id'),
+        'movie_id': serializer.data.get('movie_id'),
         'like_movie_users_count': movie.like_movie_users.count(),
         'like_movie_users': serializer.data.get('like_movie_users'),
         'isLike': isLike
@@ -362,7 +362,7 @@ def movie_dislike(request, movie_pk):
     serializer = MovieDisLikeSerializer(movie)
 
     dislike_movie_register = {
-        'id': serializer.data.get('id'),
+        'movie_id': serializer.data.get('movie_id'),
         'dislike_movie_users_count': movie.dislike_movie_users.count(),
         'dislike_movie_users': serializer.data.get('dislike_movie_users'),
         'isDislike': isDislike
@@ -390,7 +390,7 @@ def movie_watching(request, movie_pk):
     serializer = MovieWatchingSerializer(movie)
 
     watching_movie_register = {
-        'id': serializer.data.get('id'),
+        'movie_id': serializer.data.get('movie_id'),
         'watching_movie_users_count': movie.watching_movie_users.count(),
         'watching_movie_users': serializer.data.get('watching_movie_users'),
         'isWatch': isWatch
@@ -402,7 +402,7 @@ def movie_watching(request, movie_pk):
 # 인증된 사용자만 권한 허용
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def movie_favorite(request, movie_pk, quiz_item_pk):
+def movie_favorite(request, movie_pk):
     movie = get_object_or_404(Movie, pk=movie_pk)
     user = request.user
 
@@ -418,7 +418,7 @@ def movie_favorite(request, movie_pk, quiz_item_pk):
     serializer = MovieFavoriteSerializer(movie)
 
     favorite_movie_register = {
-        'id': serializer.data.get('id'),
+        'movie_id': serializer.data.get('movie_id'),
         'favorite_movie_users_count': movie.favorite_movie_users.count(),
         'favorite_movie_users': serializer.data.get('favorite_movie_users'),
         'isFavorite': isFavorite
@@ -493,8 +493,19 @@ def person_detail(request, actor_id):
 #     return Response({'recommended_movies': serializer.data})
 
 
+# @api_view(['GET'])
+# def movie_recommendation(request, title):
+#     recommended_movies = recommend_movies(request.user.id, title)
+#     serializer = MovieRecommendSerializer(recommended_movies, many=True)
+#     return Response({'recommended_movies': serializer.data})
+
+
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def movie_recommendation(request, title):
-    recommended_movies = recommend_movies(request.user.id, title)
-    serializer = MovieRecommendSerializer(recommended_movies, many=True)
-    return JsonResponse({'recommended_movies': serializer.data})
+    try:
+        recommended_movies = recommend_movies(request.user.id, title)
+        serializer = MovieRecommendSerializer(recommended_movies, many=True)
+        return Response({'recommended_movies': serializer.data})
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
