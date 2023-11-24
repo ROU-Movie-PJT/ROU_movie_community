@@ -58,13 +58,22 @@
 
 <template>
   <div v-if="profileStore.profileInfo" class="container">
-    <h1 class="text">{{ profileStore.profileInfo.username }}의 프로피일</h1>
-    <img :src="image(profileStore.profileInfo.profile_image)" alt="">
-    <img :src="profileStore.profileInfo.rate_image" alt="">
-    <p>팔로워: {{ profileStore.profileInfo.followers.length }}</p>
-    <p>팔로잉: {{ profileStore.profileInfo.followings.length }}</p>
-    <p>관심있는 장르: <span v-for="genre in profileStore.profileInfo.like_genres">{{ genre.name }}</span></p>
-    <p>관심없는 장르: <span v-for="genre in profileStore.profileInfo.hate_genres">{{ genre.name }}</span></p>
+    <div class="user-image">
+      <img class="rate-image" :src="profileStore.profileInfo.rate_image" alt="">
+      <div class="profile-circle">
+        <img class="profile-img" :src="profileStore.profileInfo.profile_image ? image(profileStore.profileInfo.profile_image) : defaultImagePath" alt="">
+      </div>
+    </div>
+    <h1 class="text">{{ profileStore.profileInfo.username }}</h1>
+    <div class="d-flex gap-3">
+      <p>팔로워: {{ profileStore.profileInfo.followers.length }}</p>
+      <p>팔로잉: {{ profileStore.profileInfo.followings.length }}</p>
+      <p>친구: {{ profileStore.profileInfo.friends.length }}</p>
+    </div>
+    <div class="preference">
+      <p class="like-genres">관심있는 장르: <span v-for="genre in profileStore.profileInfo.like_genres">{{ genre.name }}</span></p>
+      <p class="hate-genres">관심없는 장르: <span v-for="genre in profileStore.profileInfo.hate_genres">{{ genre.name }}</span></p>
+    </div>
     <button v-if="isSelf" class="button" data-bs-toggle="modal" data-bs-target="#updateModal" >선호/불호 장르 변경</button>
     <button v-if="isSelf" class="button" @click="updateUserInfo">사용자 정보 변경</button>
     <button v-if="isSelf" class="button" @click="userStore.resign">회원 탈퇴</button>
@@ -129,8 +138,24 @@
     background-color: white;
   }
 
+  .profile-circle {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: white;
+  }
+
   .profile-img {
     width: 100%;
     height: 100%;
+  }
+
+  .container {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
 </style>

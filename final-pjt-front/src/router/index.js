@@ -10,6 +10,7 @@ import ProfileView from '../views/ProfileView.vue'
 import ChangePasswordView from '../views/ChangePasswordView.vue'
 import CommunityView from '../views/CommunityView.vue'
 import CommunityDetailView from '../views/CommunityDetailView.vue'
+import UpdateReviewView from '../views/UpdateReviewView.vue'
 
 const router = createRouter({
   scrollBehavior(to, from) {
@@ -75,7 +76,7 @@ const router = createRouter({
     {
       path: '/community/:reviewId/update',
       name: 'community_update',
-      component: CreateView
+      component: UpdateReviewView
     }
   ]
 })

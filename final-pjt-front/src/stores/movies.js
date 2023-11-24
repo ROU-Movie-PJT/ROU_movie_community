@@ -164,6 +164,7 @@ export const useMovieStore = defineStore('movies', () => {
       }
     })
       .then(res => {
+        console.log(res.data)
         contentRecommendMovies.value = res.data.recommended_movies
       })
   }

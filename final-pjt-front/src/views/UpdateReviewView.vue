@@ -1,37 +1,31 @@
 <script setup>
-  import { useRoute, useRouter } from 'vue-router'
+  import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
   import { ref, computed } from 'vue'
-  import { useMovieStore } from '../stores/movies';
   import { useCommunityStore } from '../stores/community'
 
   const route = useRoute()
   const router = useRouter()
-  const store = useMovieStore()
   const communityStore = useCommunityStore()
 
-  const movieId = ref(route.params.movieId)
+  const reviewId = ref(route.params.reviewId)
 
-  const isReview = computed(() => {
-    return movieId.value !== '0'
+  onBeforeRouteUpdate((to, from) => {
+    reviewId.value = to.params.reviewId
   })
 
-  const title = ref('')
-  const content = ref('')
+  const title = ref(communityStore.reviewDetail.title)
+  const content = ref(communityStore.reviewDetail.content)
 
-  const createReview = function () {
+  const updateReview = function () {
     if (title.value === '' | content.value === '') {
       window.alert('제목과 내용을 작성해주세요')
     } else {
       const payload = {
         title:  title.value,
         content: content.value,
-        movieId: movieId.value
+        reviewId: reviewId.value
       }
-      if (isReview.value) {
-        communityStore.createMovieReview(payload)
-      } else {
-        communityStore.createReview(payload)
-      }
+      communityStore.updateReview(payload)
     }
   }
 
@@ -42,12 +36,11 @@
 
 <template>
   <div class="content-box">
-    <h3 v-if="isReview" class="h3"><b>{{ store.movieDetail.title }}</b> 리뷰</h3>
-    <form class="create-form" @submit.prevent="createReview">
+    <form class="update-form" @submit.prevent="updateReview">
       <input class="input" type="text" id="title" placeholder="제목을 입력하세요" v-model.trim="title">
       <textarea class="textarea" id="content" rows="10" placeholder="내용을 입력하세요" v-model.trim="content"></textarea>
       <div class="buttons">
-        <button class="btn btn-secondary" @click.prevent="goBack">뒤로 가기</button>
+        <button class="btn btn-secondary" @click.prevent="goBack">취소</button>
         <button class="btn btn-signature" type="submit">작성하기</button>
       </div>
     </form>
@@ -62,7 +55,7 @@
     align-items: center;
     justify-content: center;
   }
-  .create-form {
+  .update-form {
     width: 60%;
     display: flex;
     flex-direction: column;
