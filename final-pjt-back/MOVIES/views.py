@@ -495,6 +495,6 @@ def person_detail(request, actor_id):
 
 @api_view(['GET'])
 def movie_recommendation(request, title):
-    recommended_movies = recommend_movies(title)
+    recommended_movies = recommend_movies(request.user.id, title)
     serializer = MovieRecommendSerializer(recommended_movies, many=True)
     return JsonResponse({'recommended_movies': serializer.data})

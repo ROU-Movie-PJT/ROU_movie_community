@@ -10,12 +10,13 @@
 
 # # def recommend_movies(title):
 # #     # Create a DataFrame with the relevant movie information
+# #     movies = Movie.objects.filter(overview__isnull=False)
 # #     df = pd.DataFrame.from_records(Movie.objects.all().values(
 # #         'title', 'overview', 'vote_count', 'vote_average', 'popularity'
 # #     ))
 
 # #      # 사용자 선호도에 따라 영화 필터링
-# #     #  user_instance = User.objects.get(pk=user_id)
+# #     user_instance = User.objects.get(pk=user_id)
 # #     user_like_genres = User.like_genres.all()
 # #     user_hate_genres = User.hate_genres.all()
 # #     # user_like_genres = User.like_genres.all().values_list('name', flat=True)
@@ -106,40 +107,99 @@
 #         return [] 
 
 
+# # from sklearn.feature_extraction.text import TfidfVectorizer
+# # from sklearn.metrics.pairwise import linear_kernel
+# # from .models import Movie
+# # import pandas as pd
+
+# # def recommend_movies(title):
+# #     # Create a DataFrame with the relevant movie information
+# #     df = pd.DataFrame.from_records(Movie.objects.all().values(
+# #         'title', 'overview', 'vote_count', 'vote_average', 'popularity'
+# #     ))
+
+# #     # Generate TF-IDF matrix
+# #     tfidf = TfidfVectorizer(stop_words='english')
+# #     tfidf_matrix = tfidf.fit_transform(df['overview'])
+
+# #     # Compute cosine similarity matrix
+# #     cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+
+# #     # Create a Series with movie titles indexed by their DataFrame index
+# #     indices = pd.Series(df.index, index=df['title']).drop_duplicates()
+
+# #     idx = indices.get(title)
+# #     if idx is None:
+# #         return []  # 제목이 목록에 없으면 빈 리스트 반환
+
+# #     sim_scores = list(enumerate(cosine_sim[idx]))
+# #     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+# #     sim_scores = sim_scores[1:21]  # 가장 유사한 10개의 영화 선택
+
+# #     movie_indices = [i[0] for i in sim_scores]
+    
+# #     # movie_indices를 사용하여 추천된 영화의 제목을 가져오기
+# #     recommended_titles = df['title'].iloc[movie_indices]
+
+# #     # 추천된 제목과 일치하는 Movie 인스턴스 검색
+# #     recommended_movie_instances = Movie.objects.filter(title__in=recommended_titles)
+# #     return recommended_movie_instances
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+from django.contrib.auth import get_user_model  # Import the User model
 from .models import Movie
 import pandas as pd
+from rest_framework.decorators import api_view
+# from rest_framework.response import JsonResponse
+from .serializers import MovieRecommendSerializer
 
-def recommend_movies(title):
-    # Create a DataFrame with the relevant movie information
-    df = pd.DataFrame.from_records(Movie.objects.all().values(
-        'title', 'overview', 'vote_count', 'vote_average', 'popularity'
-    ))
+User = get_user_model()  # Get the User model currently in use
 
-    # Generate TF-IDF matrix
-    tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform(df['overview'])
+def recommend_movies(user_id, title):
+    try:
+        # Get the information of the currently logged in user
+        user_instance = User.objects.get(pk=user_id)
 
-    # Compute cosine similarity matrix
-    cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+        # Filter movies based on user preferences
+        user_like_genres = user_instance.like_genres.all()
+        user_hate_genres = user_instance.hate_genres.all()
 
-    # Create a Series with movie titles indexed by their DataFrame index
-    indices = pd.Series(df.index, index=df['title']).drop_duplicates()
+        # Filter only movies that belong to genres liked and not disliked by the user
+        movies = Movie.objects.filter(genres__in=user_like_genres).exclude(genres__in=user_hate_genres)
 
-    idx = indices.get(title)
-    if idx is None:
-        return []  # 제목이 목록에 없으면 빈 리스트 반환
+        # Create DataFrame from filtered movies
+        df = pd.DataFrame.from_records(movies.values(
+            'title', 'overview', 'vote_count', 'vote_average', 'popularity'
+        ))
 
-    sim_scores = list(enumerate(cosine_sim[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    sim_scores = sim_scores[1:21]  # 가장 유사한 10개의 영화 선택
+        # Generate TF-IDF matrix
+        tfidf = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = tfidf.fit_transform(df['overview'].fillna(''))  # Fill NaN with empty strings
 
-    movie_indices = [i[0] for i in sim_scores]
-    
-    # movie_indices를 사용하여 추천된 영화의 제목을 가져오기
-    recommended_titles = df['title'].iloc[movie_indices]
+        # Compute cosine similarity matrix
+        cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
 
-    # 추천된 제목과 일치하는 Movie 인스턴스 검색
-    recommended_movie_instances = Movie.objects.filter(title__in=recommended_titles)
-    return recommended_movie_instances
+        # Create a Series with movie titles indexed by their DataFrame index
+        indices = pd.Series(df.index, index=df['title']).drop_duplicates()
+
+        idx = indices.get(title)
+        if idx is None:
+            return []  # If the title is not in the list, return an empty list
+
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_scores = sim_scores[1:21]  # Select the 20 most similar movies
+
+        movie_indices = [i[0] for i in sim_scores]
+
+        # Use movie_indices to get the title of the recommended movie
+        recommended_titles = df['title'].iloc[movie_indices]
+
+        # Search for Movie instances matching the recommended title
+        recommended_movie_instances = Movie.objects.filter(title__in=recommended_titles)
+        return recommended_movie_instances
+
+    except User.DoesNotExist:
+        return []
+
