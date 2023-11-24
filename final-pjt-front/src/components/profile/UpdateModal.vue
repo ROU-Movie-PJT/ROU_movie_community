@@ -23,7 +23,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">모달 제목</h4> 
+          <h4 class="modal-title">{{ profileStore.pType === 'like' ? '선호 장르' : '불호 장르' }}</h4> 
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" ref="modalRef"></button>
         </div>
         <div class="modal-body">

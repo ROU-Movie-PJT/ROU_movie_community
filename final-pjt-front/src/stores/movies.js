@@ -153,7 +153,7 @@ export const useMovieStore = defineStore('movies', () => {
       })
   }
 
-  const contentRecommendMovies = ref()
+  const contentRecommendMovies = ref([])
 
   const getContentRecommendMovies = function() {
     axios({

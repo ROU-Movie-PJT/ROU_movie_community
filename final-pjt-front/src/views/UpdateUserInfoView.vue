@@ -35,7 +35,7 @@
         <div class="update-item">
           <label for="username">프로필 이미지</label>
           <div class="image-box">
-            <img class="profile-image" v-if="userStore.userInfo.profile_image !== ''" :src="profilePath" accept="image/*" alt="">
+            <img class="profile-image" v-if="userStore.userInfo.profile_image !== null" :src="profilePath" accept="image/*" alt="">
           </div>
           <input class="input" type="file" ref="profileImageRef" accept="image/*" @change="changeProfileImage">
         </div>
