@@ -12,7 +12,7 @@
   const route = useRoute()
   const router = useRouter()
   const userId = ref(route.params.userId)
-  const category = ref(3)
+  const category = ref(1)
 
   onMounted(() => {
     profileStore.getProfile(userId.value)
@@ -71,41 +71,47 @@
       <button v-if="isSelf" class="btn btn-signature" @click="updateUserInfo">사용자 정보 변경</button>
       <button v-if="!isSelf" class="btn btn-signature" @click="follow(userId)">{{ profileStore.profileInfo.followers.find(el => el.id === userStore.user) ? '언팔로우' : '팔로우' }}</button>
     </div>
-    <div class="d-flex gap-3">
-      <p>팔로워: {{ profileStore.profileInfo.followers.length }}</p>
-      <p>팔로잉: {{ profileStore.profileInfo.followings.length }}</p>
-      <p>친구: {{ profileStore.profileInfo.friends.length }}</p>
-    </div>
     <div class="preference">
       <p class="genres">선호 장르: <Badge class="text-bg-primary" v-for="genre in profileStore.profileInfo.like_genres" :name="genre.name" /></p>
       <p class="genres">불호 장르: <Badge class="text-bg-secondary" v-for="genre in profileStore.profileInfo.hate_genres" :name="genre.name" /></p>
     </div>
     <a v-if="isSelf" class="resign" @click="userStore.resign">회원 탈퇴</a>
-    <div class="follower-list list">
-      <div class="user-info" v-for="follower in profileStore.profileInfo.followers" :key="follower">
-        <div class="circle">
-          <img class="profile-img" :src="follower.profile_image ? image(follower.profile_image) : defaultImagePath" alt="">
-        </div>
-        <p>{{ follower.username }}</p>
-      </div>
-    </div>
-    <div class="following-list list">
-      <div class="user-info" v-for="following in profileStore.profileInfo.followings" :key="following">
-        <div class="info">
+    <div class="list-box">
+      <div v-if="profileStore.profileInfo.followers.length > 0" class="follower-list list">
+        <p>팔로워: {{ profileStore.profileInfo.followers.length }}</p>
+        <div class="user-info" v-for="follower in profileStore.profileInfo.followers" :key="follower">
           <div class="circle">
-            <img :src="following.profile_image ? image(following.profile_image) : defaultImagePath" alt="" class="profile-img">
+            <img class="profile-img" :src="follower.profile_image ? image(follower.profile_image) : defaultImagePath" alt="">
+          </div>
+          <p>{{ follower.username }}</p>
+        </div>
+      </div>
+      <div v-if="profileStore.profileInfo.followings.length > 0" class="following-list list">
+        <p>팔로잉: {{ profileStore.profileInfo.followings.length }}</p>
+        <div class="user-info" v-for="following in profileStore.profileInfo.followings" :key="following">
+          <div class="circle">
+            <img class="profile-img" :src="following.profile_image ? image(following.profile_image) : defaultImagePath" alt="">
           </div>
           <p>{{ following.username }}</p>
+          <!-- <button v-if="userStore.user == userId" class="btn btn-signature btn-sm" @click="follow(following.id)">언팔로우</button> -->
         </div>
-        <button v-if="userStore.user === userId" class="btn btn-signature btn-sm" @click="follow(following.id)">언팔로우</button>
+      </div>
+      <div v-if="profileStore.profileInfo.friends.length > 0" class="friend-list list">
+        <p>친구: {{ profileStore.profileInfo.friends.length }}</p>
+        <div class="user-info" v-for="friend in profileStore.profileInfo.friends" :key="friend">
+          <div class="circle">
+            <img :src="friend.profile_image ? image(friend.profile_image) : defaultImagePath" alt="" class="profile-img">
+          </div>
+          <p>{{ friend.username }}</p>
+        </div>
       </div>
     </div>
-    <div class="friend-list list">
-      <div class="user-info" v-for="friend in profileStore.profileInfo.friends" :key="friend">
-        <div class="circle">
-          <img :src="friend.profile_image ? image(friend.profile_image) : defaultImagePath" alt="" class="profile-img">
-        </div>
-        <p>{{ friend.username }}</p>
+    <div class="user-data">
+      <div class="menu">
+        <p @click="selectCategory(0)">좋아요한 영화</p>
+        <p @click="selectCategory(1)">찜한 영화</p>
+        <p @click="selectCategory(2)">시청한 영화</p>
+        <p @click="selectCategory(3)">싫어요한 영화</p>
       </div>
     </div>
     <div class="user-movie">
@@ -139,16 +145,35 @@
   .user-info {
     display: flex;
     align-items: center;
+    gap: .5rem;
+  }
+
+  .list-box {
+    display: flex;
+    justify-content: space-between;
   }
 
   .list {
-    width: 30%;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: .5rem;
     max-height: 30vh;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 1rem;
+  }
+
+  .list::-webkit-scrollbar {
+    width: 5px;
+    background-color: gainsboro;
+    border-radius: 5px;
+  }
+
+  .list::-webkit-scrollbar-thumb {
+    background-color: gray;
+    border-radius: 5px;
+    background-clip: padding-box;
+    border: 1px solid transparent;
   }
 
   .info {
